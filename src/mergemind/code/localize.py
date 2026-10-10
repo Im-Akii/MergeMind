@@ -181,6 +181,77 @@ def localize(
     return loc
 
 
+# v2: entire-graph and lexical localization each win on different repos (evidence/eval/locate-v1.md),
+# so both run and their file rankings are fused. Weights tuned on the dev split (locate-v2.md).
+FUSE_K = 10
+FUSE_WEIGHTS = {"entire": 0.75, "lexical": 1.0}
+
+
+def fuse_files(ranked: dict[str, list[str]], weights: dict[str, float] | None = None, k: int | None = None) -> list[str]:
+    """Weighted Reciprocal Rank Fusion of per-backend file rankings."""
+    weights = weights or FUSE_WEIGHTS
+    k = FUSE_K if k is None else k
+    score: dict[str, float] = defaultdict(float)
+    for name, files in ranked.items():
+        for rank, f in enumerate(files):
+            score[f] += weights.get(name, 1.0) / (k + rank + 1)
+    return sorted(score, key=lambda f: -score[f])
+
+
+def localize_fused(intels: dict[str, CodeIntel], repo: Path, title: str, body: str, sig: Signals,
+                   top_k: int = 5, sha: str | None = None) -> Localization:
+    """Run localization once per backend and fuse: regions follow the fused file order, impacts,
+    evidence and scope are the union, then the scope is widened (code/scope.py)."""
+    from mergemind.code.scope import widen
+
+    locs = {name: localize(intel, repo, title, body, sig, top_k=10, sha=sha) for name, intel in intels.items()}
+    if len(locs) == 1:
+        (loc,) = locs.values()
+        loc.scope_files = widen(loc.scope_files, list(dict.fromkeys(r.file for r in loc.regions)), repo)
+        loc.regions = loc.regions[:top_k]
+        return loc
+    order = fuse_files({n: list(dict.fromkeys(r.file for r in lc.regions)) for n, lc in locs.items()})
+    rank = {f: i for i, f in enumerate(order)}
+    regions: list[CodeRegion] = []
+    seen: set[tuple] = set()
+    for lc in locs.values():
+        for r in lc.regions:
+            if r.key not in seen:
+                seen.add(r.key)
+                regions.append(r)
+    regions.sort(key=lambda r: (rank.get(r.file, len(rank)), -r.score))
+    regions = _merge_adjacent(regions)[:top_k]
+    confs = [lc.confidence for lc in locs.values()]
+    agree = len({next(iter(dict.fromkeys(r.file for r in lc.regions)), None) for lc in locs.values()}) == 1
+    confidence = "high" if "high" in confs or (agree and regions) else ("medium" if "medium" in confs else "low")
+    # region evidence must follow the region order (triage pairs them by position)
+    region_ev: dict[tuple, Evidence] = {}
+    for lc in locs.values():
+        for r, e in zip(lc.regions, [e for e in lc.evidence if e.kind == "code_region"]):
+            region_ev.setdefault(r.key, e)
+    evidence = [region_ev[r.key] for r in regions if r.key in region_ev]
+    evidence += list({e.id: e for lc in locs.values() for e in lc.evidence if e.kind != "code_region"}.values())
+    scope = list(dict.fromkeys(f for lc in locs.values() for f in lc.scope_files))
+    # one impact per symbol: callers and tests are the union of what each backend found
+    impacts: dict[tuple[str, str], Impact] = {}
+    for imp in (i for lc in locs.values() for i in lc.impacts):
+        key = (imp.file, imp.symbol)
+        if key not in impacts:
+            impacts[key] = Impact(imp.symbol, imp.file, list(imp.callers), list(imp.tests), list(imp.co_changed),
+                                  imp.public_api)
+            continue
+        m = impacts[key]
+        seen_callers = {(c.file, c.symbol) for c in m.callers}
+        m.callers += [c for c in imp.callers if (c.file, c.symbol) not in seen_callers]
+        m.tests = list(dict.fromkeys(m.tests + imp.tests))
+        m.co_changed = m.co_changed or imp.co_changed
+        m.public_api = m.public_api or imp.public_api
+    return Localization(
+        regions, confidence, {f"{n}:{q}": rs for n, lc in locs.items() for q, rs in lc.queries.items()},
+        impacts=list(impacts.values()), scope_files=widen(scope, order, repo),
+        evidence=evidence, backend="+".join(locs))
+
+
 def _excerpt(path: Path, start: int, end: int, max_lines: int = 40) -> str:
     try:
         lines = path.read_text(encoding="utf-8", errors="replace").splitlines()

@@ -1,24 +1,24 @@
 # MergeMind unit economics (inputs for cfo.ai)
 
-Measured from the v1 backtest (time-travelled triage on real issues) and live PR reviews on the sandbox. Prices are public list prices for hosted Nemotron (sources at the end). Volumes are assumptions to edit in cfo.ai.
+Measured from the v2 backtest (time-travelled triage on real issues) and live PR reviews on the sandbox. Prices are public list prices for hosted Nemotron (sources at the end). Volumes are assumptions to edit in cfo.ai.
 
 ## Cost per unit
 
 | Unit | Median | p90 |
 |---|---|---|
-| Triage of one issue (investigator + verifier + duplicates + leak guard) | $0.0079 | $0.0118 |
-| One PR review | $0.0004 | $0.0005 |
-| **All-in LLM cost per issue** (triage + 50% accepted × 2 PR reviews) | **$0.0084** | **$0.0123** |
+| Triage of one issue (investigator + verifier + duplicates + leak guard) | $0.0069 | $0.0108 |
+| One PR review | $0.0005 | $0.0007 |
+| **All-in LLM cost per issue** (triage + 50% accepted × 2 PR reviews) | **$0.0074** | **$0.0115** |
 
-Tokens per triaged issue: median 69380.5, p90 86962 (n=18).
+Tokens per triaged issue: median 55060.0, p90 87949 (n=18).
 
 ## Cost per repo per month (conservative: p90 cost per issue)
 
 | Scenario (assumed volume) | Issues / month | LLM + compute / month |
 |---|---|---|
-| small OSS repo | 15 | $0.6848 |
-| active OSS repo | 80 | $1.49 |
-| busy repo / internal team | 300 | $4.20 |
+| small OSS repo | 15 | $0.6727 |
+| active OSS repo | 80 | $1.42 |
+| busy repo / internal team | 300 | $3.95 |
 
 ## Segments (buildplan-v2 §11)
 

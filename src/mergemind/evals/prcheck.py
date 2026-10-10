@@ -17,6 +17,7 @@ from pathlib import Path
 
 from mergemind.code.graph import is_doc, is_test
 from mergemind.code.repo_cache import git
+from mergemind.code.scope import out_of_scope
 from mergemind.evals.dataset import Item
 from mergemind.github.client import GitHub, GitHubError
 from mergemind.guard.paths import PathGuard
@@ -59,6 +60,7 @@ def run(gh: GitHub, items: list[Item], repo_path: Path, branch: str, scopes: dic
         sensitive: list[str]) -> list[PRRow]:
     shas, prs = reverted_prs(repo_path, branch)
     guard, scanner = PathGuard(sensitive), SecretScanner()
+    own = safety.own_packages(git(repo_path, "ls-tree", "-r", "--name-only", f"origin/{branch}", check=False).splitlines())
     rows = []
     for it in items:
         row = PRRow(it.repo, it.number, it.pr_number)
@@ -69,11 +71,11 @@ def run(gh: GitHub, items: list[Item], repo_path: Path, branch: str, scopes: dic
             row.error = e.error_class
             rows.append(row)
             continue
-        row.flags = [asdict(f) for f in safety.scan(files, guard, scanner)]
+        row.flags = [asdict(f) for f in safety.scan(files, guard, scanner, own=own)]
         row.changed_source = [f.path for f in files if not is_test(f.path) and not is_doc(f.path)]
         if it.number in scopes:
-            scope = set(scopes[it.number])
-            row.out_of_scope = [p for p in row.changed_source if p not in scope]
+            new = {f.path for f in files if f.status == "added"}
+            row.out_of_scope = out_of_scope([(p, p in new) for p in row.changed_source], scopes[it.number])
         rows.append(row)
     return rows
 
@@ -95,10 +97,26 @@ def summarize(rows: list[PRRow]) -> dict:
         "reverted_and_flagged": sum(1 for r in reverted if r.flags),
         "not_reverted_flag_rate": (sum(1 for r in ok if not r.reverted and r.flags)
                                    / max(1, sum(1 for r in ok if not r.reverted))),
+        "hold_rate_ci": _ci([float(bool(r.flags)) for r in ok]),
         "with_scope": len(with_scope),
         "any_out_of_scope_rate": (sum(1 for r in with_scope if r.out_of_scope) / len(with_scope)) if with_scope else None,
         "all_in_scope_rate": (sum(1 for r in with_scope if not r.out_of_scope) / len(with_scope)) if with_scope else None,
+        "any_out_of_scope_rate_ci": _ci([float(bool(r.out_of_scope)) for r in with_scope]),
     }
+
+
+def _ci(values: list[float]) -> list[float] | None:
+    from mergemind.evals.metrics import bootstrap
+
+    return list(bootstrap(values)) if values else None
+
+
+def split_rows(rows: list[PRRow], items: list[Item]) -> tuple[list[PRRow], list[PRRow]]:
+    """Same time split as the localization backtest: per repo, oldest 60% dev, newest 40% test."""
+    order = sorted(items, key=lambda it: it.created_at)
+    test_ids = {(it.repo, it.number) for it in order[int(len(order) * 0.6):]}
+    dev = [r for r in rows if (r.repo, r.issue) not in test_ids]
+    return dev, [r for r in rows if (r.repo, r.issue) in test_ids]
 
 
 def save(rows: list[PRRow], path: Path) -> None:

@@ -1,0 +1,91 @@
+{
+  "run": "dev-v1",
+  "model_investigator": "nvidia/nemotron-3-super-120b-a12b",
+  "model_fast": "nvidia/nemotron-3.5-lightning-30b-a3b",
+  "all": {
+    "issues": 8,
+    "errors": 1,
+    "dispositions": {
+      "escalate": 4,
+      "feature_review": 1,
+      "accept": 3
+    },
+    "accept_rate": 0.375,
+    "localization_hit@1": 0.75,
+    "localization_hit@3": 0.75,
+    "accepted_scope_coverage": 0.8888888888888888,
+    "verifier_rejected_rate": 0.375,
+    "repair_rate": 0.125,
+    "tool_calls_median": 10.0,
+    "in_tokens_median": 69182.5,
+    "out_tokens_median": 4957.5,
+    "tokens_median": 73706.5,
+    "tokens_p90": 97234,
+    "seconds_median": 477.5,
+    "seconds_p90": 619.5
+  },
+  "per_repo": {
+    "encode/httpx": {
+      "issues": 3,
+      "errors": 0,
+      "dispositions": {
+        "escalate": 2,
+        "feature_review": 1
+      },
+      "accept_rate": 0.0,
+      "localization_hit@1": 0.6666666666666666,
+      "localization_hit@3": 0.6666666666666666,
+      "accepted_scope_coverage": null,
+      "verifier_rejected_rate": 0.6666666666666666,
+      "repair_rate": 0.0,
+      "tool_calls_median": 10,
+      "in_tokens_median": 92272,
+      "out_tokens_median": 4962,
+      "tokens_median": 97234,
+      "tokens_p90": 106632,
+      "seconds_median": 145.2,
+      "seconds_p90": 212.9
+    },
+    "pydantic/pydantic": {
+      "issues": 2,
+      "errors": 1,
+      "dispositions": {
+        "accept": 2
+      },
+      "accept_rate": 1.0,
+      "localization_hit@1": 1.0,
+      "localization_hit@3": 1.0,
+      "accepted_scope_coverage": 0.8333333333333333,
+      "verifier_rejected_rate": 0.0,
+      "repair_rate": 0.5,
+      "tool_calls_median": 5.0,
+      "in_tokens_median": 40665.0,
+      "out_tokens_median": 8767.5,
+      "tokens_median": 49432.5,
+      "tokens_p90": 60017,
+      "seconds_median": 555.35,
+      "seconds_p90": 650.2
+    },
+    "pytest-dev/pytest": {
+      "issues": 3,
+      "errors": 0,
+      "dispositions": {
+        "escalate": 2,
+        "accept": 1
+      },
+      "accept_rate": 0.3333333333333333,
+      "localization_hit@1": 0.6666666666666666,
+      "localization_hit@3": 0.6666666666666666,
+      "accepted_scope_coverage": 1.0,
+      "verifier_rejected_rate": 0.3333333333333333,
+      "repair_rate": 0.0,
+      "tool_calls_median": 10,
+      "in_tokens_median": 77110,
+      "out_tokens_median": 4095,
+      "tokens_median": 81205,
+      "tokens_p90": 82199,
+      "seconds_median": 576.8,
+      "seconds_p90": 619.5
+    }
+  }
+}

@@ -21,7 +21,10 @@ from mergemind.tracing import span
 PROMPT_VERSION = "critic-v1"
 
 _QUOTED = re.compile(r'"([^"\n]{8,200})"|“([^”\n]{8,200})”')
-_MENTION = re.compile(r"(?<![\w`])@[A-Za-z0-9-]+")
+# decorators and attribute access (`@pytest.mark.parametrize`, `@app.get(`) are code, not mentions;
+# real mentions are also escaped by the leak guard before anything is posted
+_MENTION = re.compile(r"(?<![\w`])@[A-Za-z0-9-]+(?![\w.(-])")
+_CODE_SPAN = re.compile(r"`[^`\n]*`")
 _SECRET = re.compile(r"(gh[pousr]_[A-Za-z0-9]{20,}|github_pat_\w{20,}|AKIA[0-9A-Z]{16}|nvapi-[\w-]{20,}|"
                      r"xox[baprs]-[\w-]{10,}|-----BEGIN [A-Z ]*PRIVATE KEY-----|sk-[A-Za-z0-9]{20,})")
 
@@ -32,9 +35,38 @@ class Verdict:
     failures: list[str] = field(default_factory=list)
     critic: dict | None = None
     usage: Usage = field(default_factory=Usage)
+    normalized: list[str] = field(default_factory=list)
 
     def feedback(self) -> str:
         return "\n".join(f"- {f}" for f in self.failures)
+
+
+def _evidence_file(locator: str) -> str:
+    return locator.split("#")[0].split("::")[0]
+
+
+def normalize_localization(report: InvestigatorReport, ledger: Ledger, repo: Path, files: set[str]) -> list[str]:
+    """v2: fix mechanical slips in localized regions before the rules run, instead of spending a
+    repair round on them (dev-split diagnosis, evidence/eval/triage-dev-v1.log). Only regions in
+    files that exist: a line range past the end is clamped, and an evidence reference that is not an
+    id (the model pasted code) is replaced by evidence the agent gathered for that same file.
+    Claims are never touched; a region in a file the agent never looked at still fails."""
+    fixed: list[str] = []
+    by_file: dict[str, list] = {}
+    for ev in ledger.items.values():
+        by_file.setdefault(_evidence_file(ev.locator), []).append(ev)
+    for r in report.localization:
+        if r.file not in files:
+            continue
+        n = len((repo / r.file).read_text(encoding="utf-8", errors="replace").splitlines())
+        if 1 <= r.start <= n < r.end:
+            fixed.append(f"{r.file}: end line {r.end} clamped to {n}")
+            r.end = n
+        if r.evidence not in ledger and by_file.get(r.file):
+            ev = by_file[r.file][0]
+            fixed.append(f"{r.file}: evidence reference replaced by {ev.id}")
+            r.evidence = ev.id
+    return fixed
 
 
 def _texts(report: InvestigatorReport) -> list[str]:
@@ -98,7 +130,7 @@ def check_rules(
 
     # 6. no @mentions, no secrets in model-written text
     for t in _texts(report):
-        if _MENTION.search(t):
+        if _MENTION.search(_CODE_SPAN.sub("", t)):
             fails.append(f"text contains an @mention: {t[:60]!r}")
         if _SECRET.search(t):
             fails.append("text contains something that looks like a secret")
@@ -164,9 +196,10 @@ def verify(llm: LLM | None, report: InvestigatorReport, ledger: Ledger, repo: Pa
            use_critic: bool = True) -> Verdict:
     from mergemind import tracing
 
+    fixed = normalize_localization(report, ledger, repo, files)
     fails = check_rules(report, ledger, repo, files, guard, dups, created_at)
-    tracing.attrs(rule_failures=fails, rules_ok=not fails)
-    v = Verdict(ok=not fails, failures=fails)
+    tracing.attrs(rule_failures=fails, rules_ok=not fails, normalized=fixed)
+    v = Verdict(ok=not fails, failures=fails, normalized=fixed)
     if not fails and use_critic and llm is not None:
         cv, usage = critic(llm, report, ledger, issue_text)
         v.usage = usage

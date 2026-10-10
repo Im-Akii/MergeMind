@@ -1,0 +1,205 @@
+{
+  "run": "v2",
+  "all": {
+    "prs": 438,
+    "held_by_safety_scan": 36,
+    "hold_rate": 0.0821917808219178,
+    "flag_kinds_per_pr": {
+      "dependencies": 23,
+      "build_script": 16,
+      "ci_config": 5,
+      "secret": 3,
+      "deletion": 2
+    },
+    "flags_total": {
+      "dependencies": 29,
+      "ci_config": 19,
+      "build_script": 17,
+      "deletion": 9,
+      "secret": 3
+    },
+    "reverted_prs": 2,
+    "reverted_and_flagged": 0,
+    "not_reverted_flag_rate": 0.08256880733944955,
+    "hold_rate_ci": [
+      0.0821917808219178,
+      0.05707762557077625,
+      0.10730593607305935
+    ],
+    "with_scope": 412,
+    "any_out_of_scope_rate": 0.44902912621359226,
+    "all_in_scope_rate": 0.5509708737864077,
+    "any_out_of_scope_rate_ci": [
+      0.44902912621359226,
+      0.40048543689320387,
+      0.4975728155339806
+    ]
+  },
+  "test": {
+    "prs": 180,
+    "held_by_safety_scan": 13,
+    "hold_rate": 0.07222222222222222,
+    "flag_kinds_per_pr": {
+      "dependencies": 9,
+      "build_script": 6,
+      "secret": 2,
+      "ci_config": 1
+    },
+    "flags_total": {
+      "dependencies": 10,
+      "build_script": 6,
+      "secret": 2,
+      "ci_config": 1
+    },
+    "reverted_prs": 0,
+    "reverted_and_flagged": 0,
+    "not_reverted_flag_rate": 0.07222222222222222,
+    "hold_rate_ci": [
+      0.07222222222222222,
+      0.03888888888888889,
+      0.1111111111111111
+    ],
+    "with_scope": 173,
+    "any_out_of_scope_rate": 0.4277456647398844,
+    "all_in_scope_rate": 0.5722543352601156,
+    "any_out_of_scope_rate_ci": [
+      0.4277456647398844,
+      0.35260115606936415,
+      0.5028901734104047
+    ]
+  },
+  "dev": {
+    "prs": 258,
+    "held_by_safety_scan": 23,
+    "hold_rate": 0.08914728682170543,
+    "flag_kinds_per_pr": {
+      "dependencies": 14,
+      "build_script": 10,
+      "ci_config": 4,
+      "deletion": 2,
+      "secret": 1
+    },
+    "flags_total": {
+      "dependencies": 19,
+      "ci_config": 18,
+      "build_script": 11,
+      "deletion": 9,
+      "secret": 1
+    },
+    "reverted_prs": 2,
+    "reverted_and_flagged": 0,
+    "not_reverted_flag_rate": 0.08984375,
+    "hold_rate_ci": [
+      0.08914728682170543,
+      0.05426356589147287,
+      0.12403100775193798
+    ],
+    "with_scope": 239,
+    "any_out_of_scope_rate": 0.46443514644351463,
+    "all_in_scope_rate": 0.5355648535564853,
+    "any_out_of_scope_rate_ci": [
+      0.46443514644351463,
+      0.401673640167364,
+      0.5271966527196653
+    ]
+  },
+  "per_repo": {
+    "encode/httpx": {
+      "prs": 145,
+      "held_by_safety_scan": 16,
+      "hold_rate": 0.1103448275862069,
+      "flag_kinds_per_pr": {
+        "build_script": 8,
+        "dependencies": 7,
+        "secret": 3,
+        "deletion": 1
+      },
+      "flags_total": {
+        "build_script": 8,
+        "dependencies": 7,
+        "secret": 3,
+        "deletion": 1
+      },
+      "reverted_prs": 1,
+      "reverted_and_flagged": 0,
+      "not_reverted_flag_rate": 0.1111111111111111,
+      "hold_rate_ci": [
+        0.1103448275862069,
+        0.06206896551724138,
+        0.16551724137931034
+      ],
+      "with_scope": 128,
+      "any_out_of_scope_rate": 0.3125,
+      "all_in_scope_rate": 0.6875,
+      "any_out_of_scope_rate_ci": [
+        0.3125,
+        0.234375,
+        0.390625
+      ]
+    },
+    "pydantic/pydantic": {
+      "prs": 143,
+      "held_by_safety_scan": 13,
+      "hold_rate": 0.09090909090909091,
+      "flag_kinds_per_pr": {
+        "dependencies": 12,
+        "build_script": 3,
+        "ci_config": 3,
+        "deletion": 1
+      },
+      "flags_total": {
+        "dependencies": 18,
+        "ci_config": 16,
+        "deletion": 8,
+        "build_script": 3
+      },
+      "reverted_prs": 1,
+      "reverted_and_flagged": 0,
+      "not_reverted_flag_rate": 0.09154929577464789,
+      "hold_rate_ci": [
+        0.09090909090909091,
+        0.04895104895104895,
+        0.13986013986013987
+      ],
+      "with_scope": 135,
+      "any_out_of_scope_rate": 0.4444444444444444,
+      "all_in_scope_rate": 0.5555555555555556,
+      "any_out_of_scope_rate_ci": [
+        0.4444444444444444,
+        0.362962962962963,
+        0.5259259259259259
+      ]
+    },
+    "pytest-dev/pytest": {
+      "prs": 150,
+      "held_by_safety_scan": 7,
+      "hold_rate": 0.04666666666666667,
+      "flag_kinds_per_pr": {
+        "build_script": 5,
+        "dependencies": 4,
+        "ci_config": 2
+      },
+      "flags_total": {
+        "build_script": 6,
+        "dependencies": 4,
+        "ci_config": 3
+      },
+      "reverted_prs": 0,
+      "reverted_and_flagged": 0,
+      "not_reverted_flag_rate": 0.04666666666666667,
+      "hold_rate_ci": [
+        0.04666666666666667,
+        0.013333333333333334,
+        0.08
+      ],
+      "with_scope": 149,
+      "any_out_of_scope_rate": 0.5704697986577181,
+      "all_in_scope_rate": 0.42953020134228187,
+      "any_out_of_scope_rate_ci": [
+        0.5704697986577181,
+        0.4899328859060403,
+        0.6510067114093959
+      ]
+    }
+  }
+}

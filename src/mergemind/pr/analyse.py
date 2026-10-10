@@ -10,8 +10,9 @@ from typing import Any, Literal
 from pydantic import BaseModel, Field
 
 from mergemind.agents.ledger import Ledger
-from mergemind.code.graph import code_intel, is_doc, is_test
+from mergemind.code.graph import code_intel
 from mergemind.code.repo_cache import RepoCache, git
+from mergemind.code.scope import out_of_scope as scope_check
 from mergemind.config import Policy, Settings
 from mergemind.github.client import GitHub
 from mergemind.guard.paths import PathGuard
@@ -144,9 +145,8 @@ def analyse_pr(
     mergeable = pr.get("mergeable") is not False and not conflicts
 
     # scope: test, doc and changelog edits are always fine
-    scope = set(scope_files)
     changed = [f.path for f in files]
-    out_of_scope = [p for p in changed if p not in scope and not is_test(p) and not is_doc(p)]
+    out_of_scope = scope_check([(f.path, f.status == "added") for f in files], scope_files)
 
     # impact of the changed code
     intel = code_intel(worktree)
@@ -167,10 +167,11 @@ def analyse_pr(
 
     # safety
     scanner = SecretScanner.from_environment()
-    for f in git(path, "ls-files", check=False).splitlines():
+    base_files = git(path, "ls-files", check=False).splitlines()
+    for f in base_files:
         if guard.is_sensitive(f):
             scanner.learn_file(path / f)
-    flags = [f.__dict__ for f in safety.scan(files, guard, scanner)]
+    flags = [f.__dict__ for f in safety.scan(files, guard, scanner, own=safety.own_packages(base_files))]
 
     # fix check (skipped when hard failures already decide the outcome)
     criteria: list[CriterionResult] = []

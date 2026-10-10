@@ -225,9 +225,11 @@ def _exported(repo: Path, file: str, name: str) -> bool:
     return bool(re.search(rf"\b{re.escape(name)}\b", text))
 
 
-def co_changed(repo: Path, file: str, max_commits: int = 200, top: int = 8) -> list[tuple[str, int]]:
-    """Files that most often change in the same commits as `file`."""
-    out = git(repo, "log", f"-n{max_commits}", "--format=%x1e", "--name-only", "--full-diff", "--", file, check=False)
+def co_changed(repo: Path, file: str, max_commits: int = 200, top: int = 8,
+               rev: str | None = None) -> list[tuple[str, int]]:
+    """Files that most often change in the same commits as `file` (history up to `rev`, default HEAD)."""
+    out = git(repo, "log", *([rev] if rev else []), f"-n{max_commits}", "--format=%x1e", "--name-only",
+              "--full-diff", "--", file, check=False)
     counts: Counter = Counter()
     for block in out.split(""):
         names = {n.strip() for n in block.splitlines() if n.strip()}
@@ -380,6 +382,14 @@ class EntireIntel:
         except Exception as e:
             log.warning("entire impact failed (%s); lexical fallback", e)
             return self.fallback.impact(symbol, file)
+
+
+def code_intels(repo_path: Path, faults: Any = None) -> dict[str, CodeIntel]:
+    """Every available backend by name, for fused localization (entire-graph first when installed)."""
+    primary = code_intel(repo_path, faults=faults)
+    if isinstance(primary, EntireIntel):
+        return {"entire": primary, "lexical": primary.fallback}
+    return {"lexical": primary}
 
 
 def code_intel(repo_path: Path, prefer_entire: bool = True, faults: Any = None) -> CodeIntel:

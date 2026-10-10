@@ -88,6 +88,9 @@ class TriageRow:
     run_id: int | None = None
     by_model: dict = field(default_factory=dict)
     error: str | None = None
+    notes: list[str] = field(default_factory=list)
+    localization_confidence: float | None = None
+    disposition_confidence: float | None = None
 
 
 def run_one(settings: Settings, store: Store, gh: GitHub, llm: LLM, cache: RepoCache, item: Item,
@@ -120,11 +123,18 @@ def run_one(settings: Settings, store: Store, gh: GitHub, llm: LLM, cache: RepoC
     row.in_tok, row.out_tok, row.cached = out.usage.in_tok, out.usage.out_tok, out.usage.cached
     row.seconds, row.run_id = round(time.monotonic() - t, 1), out.run_id
     row.by_model = out.usage.by_model
+    row.notes = list(out.notes)
+    row.localization_confidence, row.disposition_confidence = r.localization_confidence, r.disposition_confidence
     return row
 
 
 def run(settings: Settings, store: Store, gh: GitHub, llm: LLM, cache: RepoCache, items: list[Item], branch: str,
-        run_id: str, out: Path) -> list[TriageRow]:
+        run_id: str, out: Path, workers: int = 1) -> list[TriageRow]:
+    """Resumable; `workers` issues run in parallel (the store is SQLite in serialized mode, the LLM
+    client has one shared rate limiter)."""
+    import threading
+    from concurrent.futures import ThreadPoolExecutor
+
     done = {}
     if out.exists():
         for line in out.read_text(encoding="utf-8").splitlines():
@@ -132,15 +142,27 @@ def run(settings: Settings, store: Store, gh: GitHub, llm: LLM, cache: RepoCache
             done[r.number] = r
     rows = list(done.values())
     todo = [it for it in items if it.number not in done]
-    for i, it in enumerate(todo, 1):
+    out.parent.mkdir(parents=True, exist_ok=True)
+    git_lock, out_lock, counter = threading.Lock(), threading.Lock(), [0]
+
+    def one(it: Item) -> None:
+        with git_lock:  # git worktree add takes repo-wide locks
+            sha = snapshot_sha(cache.path(it.repo), branch, it.created_at)
+            if sha:
+                cache.worktree(it.repo, sha)
         row = run_one(settings, store, gh, llm, cache, it, branch, run_id)
-        rows.append(row)
-        out.parent.mkdir(parents=True, exist_ok=True)
-        with out.open("a", encoding="utf-8") as f:
-            f.write(json.dumps(asdict(row)) + "\n")
-        log.info("[%d/%d] %s#%d -> %s localized=%s truth=%s tokens=%d/%d %.0fs %s", i, len(todo), it.repo, it.number,
-                 row.disposition, row.localized[:3], row.truth[:3], row.in_tok, row.out_tok, row.seconds,
-                 row.error or "")
+        with out_lock:
+            rows.append(row)
+            counter[0] += 1
+            with out.open("a", encoding="utf-8") as f:
+                f.write(json.dumps(asdict(row)) + "\n")
+            log.info("[%d/%d] %s#%d -> %s localized=%s truth=%s tokens=%d/%d %.0fs %s", counter[0], len(todo),
+                     it.repo, it.number, row.disposition, row.localized[:3], row.truth[:3], row.in_tok, row.out_tok,
+                     row.seconds, row.error or "")
+
+    with ThreadPoolExecutor(max_workers=max(1, workers)) as pool:
+        for fut in [pool.submit(one, it) for it in todo]:
+            fut.result()
     return rows
 
 

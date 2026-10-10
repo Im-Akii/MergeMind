@@ -14,8 +14,8 @@ from mergemind.agents.investigator import Budget, Investigator, InvestigatorRepo
 from mergemind.agents.ledger import Ledger
 from mergemind.agents.tools import ToolBox
 from mergemind.agents.verifier import Verdict, to_json, verify
-from mergemind.code.graph import code_intel, is_doc
-from mergemind.code.localize import Localization, difficulty, localize
+from mergemind.code.graph import code_intels, is_doc, is_test
+from mergemind.code.localize import Localization, difficulty, localize_fused
 from mergemind.code.profile import get_brief
 from mergemind.code.repo_cache import RepoCache, git
 from mergemind.code.signals import extract
@@ -129,8 +129,10 @@ def decide(report: InvestigatorReport, loc: Localization, verdict: Verdict, ledg
     return "escalate", notes
 
 
-def compute_scope(report: InvestigatorReport, loc: Localization, intel: Any, guard: PathGuard) -> list[Region]:
-    """Scope = localized regions + callers and tests of their symbols (computed by code, not the LLM)."""
+def compute_scope(report: InvestigatorReport, loc: Localization, intel: Any, guard: PathGuard,
+                  repo: Path | None = None) -> list[Region]:
+    """Scope = localized regions + callers and tests of their symbols, widened (v2) with the top
+    ranked files and their co-changed files (computed by code, not the LLM; code/scope.py)."""
     scope: dict[tuple, Region] = {}
     for r in report.localization:
         scope.setdefault((r.file, r.start), r)
@@ -149,6 +151,15 @@ def compute_scope(report: InvestigatorReport, loc: Localization, intel: Any, gua
                                                            end=c.end, symbol=c.symbol, role="related"))
         for t in imp.tests[:10]:
             scope.setdefault((t, 1), Region(evidence="impact", file=t, start=1, end=1, symbol=None, role="related"))
+    if repo is not None:
+        from mergemind.code.scope import widen
+
+        have = {r.file for r in scope.values()}
+        ranked = list(dict.fromkeys([r.file for r in report.localization] + [r.file for r in loc.regions]))
+        for f in widen([], ranked, repo):
+            if f not in have and not is_test(f):
+                have.add(f)
+                scope[(f, 1)] = Region(evidence="scope", file=f, start=1, end=1, symbol=None, role="related")
     return [r for r in scope.values() if not guard.is_sensitive(r.file)]
 
 
@@ -229,8 +240,9 @@ def triage_issue(
     # plain-code localization first: grounds the agent and costs no tokens
     title, body = clean(issue.get("title"), 300), clean(issue.get("body"))
     sig = extract(f"{title}\n{body}", fileset)
-    intel = code_intel(path, faults=llm.faults)
-    loc = localize(intel, path, title, body, sig, sha=sha)
+    intels = code_intels(path, faults=llm.faults)
+    intel = next(iter(intels.values()))  # entire-graph when installed: the investigator's tools and impact
+    loc = localize_fused(intels, path, title, body, sig, sha=sha)
     loc.regions = [r for r in loc.regions if not guard.is_sensitive(r.file)]
     for ev in loc.evidence:
         if not guard.is_sensitive(ev.locator.split("#")[0].split("::")[0]):
@@ -268,7 +280,7 @@ def triage_issue(
     else:
         r = result.report
         disposition, notes = decide(r, loc, verdict, ledger, possible_security)
-        scope = compute_scope(r, loc, intel, guard) if disposition == "accept" else []
+        scope = compute_scope(r, loc, intel, guard, path) if disposition == "accept" else []
         open_q = list(r.open_questions)
         if disposition == "accept" and r.missing_info:
             open_q += [f"{m.field}: {m.why}" for m in r.missing_info]

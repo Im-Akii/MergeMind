@@ -1,0 +1,157 @@
+2026-10-10 20:44:38,268 INFO httpx: HTTP Request: GET https://api.github.com/repos/encode/httpx/issues?state=all&sort=updated&direction=desc&since=2026-10-08T15%3A22%3A47Z&per_page=100&page=1 "HTTP/1.1 200 OK"
+2026-10-10 20:44:43,130 INFO httpx: HTTP Request: GET https://api.github.com/repos/encode/httpx/issues?state=all&sort=updated&direction=desc&since=2026-10-08T15%3A22%3A47Z&per_page=100&page=1 "HTTP/1.1 200 OK"
+2026-10-10 20:44:44,384 INFO httpx2: HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 20:44:44,441 INFO httpx: HTTP Request: GET https://api.github.com/repos/encode/httpx/issues?state=all&sort=updated&direction=desc&since=2026-10-08T15%3A22%3A47Z&per_page=100&page=1 "HTTP/1.1 200 OK"
+2026-10-10 20:44:47,944 INFO httpx2: HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 20:44:48,059 INFO httpx2: HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 20:44:50,766 INFO httpx2: HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 20:44:52,853 INFO httpx2: HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 20:44:53,844 INFO httpx2: HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 20:45:00,209 INFO httpx2: HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 20:45:01,525 INFO httpx2: HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 20:45:02,433 INFO httpx2: HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 20:45:03,602 INFO httpx2: HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 20:45:04,455 INFO httpx2: HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 20:45:05,998 INFO httpx2: HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 20:45:08,352 INFO httpx2: HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 20:45:09,269 INFO httpx2: HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 20:45:10,024 INFO httpx2: HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 20:45:11,633 INFO httpx2: HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 20:45:20,714 INFO httpx2: HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 20:45:21,075 INFO httpx2: HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 20:45:22,918 WARNING opentelemetry.exporter.otlp.proto.http.trace_exporter: Transient error Bad Gateway encountered while exporting spans batch, retrying in 1.18s.
+2026-10-10 20:45:23,428 INFO httpx2: HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 20:45:24,731 INFO httpx2: HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 20:45:28,407 INFO httpx2: HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 20:45:29,323 INFO httpx2: HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 20:45:29,507 INFO httpx2: HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 20:45:30,884 INFO httpx2: HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 20:45:36,523 INFO httpx2: HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 20:45:40,681 INFO httpx2: HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 20:45:41,519 INFO httpx2: HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 20:45:46,894 INFO httpx2: HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 20:45:52,136 INFO httpx2: HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 20:45:52,236 INFO mergemind.triage: verifier rejected report: ['critic: claim 1 is not supported by its cited evidence: The cited excerpt from httpx/_exceptions.py shows httpcore.ReadTimeout is NOT mapped to httpx.ReadTimeout. The code at that location raises httpcore._exceptions.ReadTimeout directly without conversion.', "critic: disposition 'needs_info' looks unreasonable: The issue reports that httpcore.ReadTimeout should be mapped to httpx.ReadTimeout, but the code and traceback show the exception is raised unmapped. The user's expectation that httpx.RequestError would catch it is not met because the mapping does not exist. The disposition is therefore not reasonable as the reported problem (missing mapping) is factual."]
+2026-10-10 20:45:52,440 INFO mergemind.evals.triage_eval: [1/3] encode/httpx#1188 -> escalate localized=[] truth=['httpx/_models.py'] tokens=92272/4962 118s 
+2026-10-10 20:46:01,422 INFO httpx2: HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 20:46:05,619 INFO httpx2: HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 20:46:05,657 INFO mergemind.triage: verifier rejected report: ['localization httpx/dispatch/connection.py cites unknown evidence assert self.open_connection is not None', 'invalid line range httpx/dispatch/connection.py L174-176 (file has 154 lines)', 'localization httpx/dispatch/connection_pool.py cites unknown evidence if http2_only and not connection.is_http2:']
+2026-10-10 20:46:09,052 INFO httpx2: HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 20:46:15,500 INFO httpx2: HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 20:46:17,504 INFO httpx2: HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 20:46:19,201 INFO httpx2: HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 20:46:19,274 INFO mergemind.evals.triage_eval: [2/3] encode/httpx#689 -> escalate localized=['httpx/dispatch/connection.py', 'httpx/dispatch/connection_pool.py'] truth=['httpx/dispatch/base.py', 'httpx/dispatch/connection.py', 'httpx/dispatch/http11.py'] tokens=99799/6833 145s 
+2026-10-10 20:46:20,175 INFO httpx2: HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 20:46:23,177 INFO httpx2: HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 20:46:27,837 INFO httpx2: HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 20:46:36,959 INFO httpx2: HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 20:46:45,953 INFO httpx2: HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 20:46:53,335 INFO httpx2: HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 20:46:54,193 INFO httpx2: HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 20:46:59,359 INFO httpx2: HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 20:47:05,404 INFO httpx2: HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 20:47:08,943 INFO httpx2: HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 20:47:19,023 INFO httpx2: HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 20:47:26,968 INFO httpx2: HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 20:47:27,118 INFO mergemind.evals.triage_eval: [3/3] encode/httpx#948 -> feature_review localized=['httpx/_config.py', 'httpx/_client.py'] truth=['httpx/_client.py', 'httpx/_config.py'] tokens=61255/4953 213s 
+encode/httpx: {"issues": 3, "errors": 0, "dispositions": {"escalate": 2, "feature_review": 1}, "accept_rate": 0.0, "localization_hit@1": 0.6666666666666666, "localization_hit@3": 0.6666666666666666, "accepted_scope_coverage": null, "verifier_rejected_rate": 0.6666666666666666, "repair_rate": 0.0, "tool_calls_median": 10, "in_tokens_median": 92272, "out_tokens_median": 4962, "tokens_median": 97234, "tokens_p90": 106632, "seconds_median": 145.2, "seconds_p90": 212.9}
+2026-10-10 20:47:27,784 INFO mergemind.evals.triage_eval: [1/3] pydantic/pydantic#12376 ->  localized=[] truth=[] tokens=0/0 0s fix files did not exist at the snapshot
+2026-10-10 20:52:19,743 INFO httpx: HTTP Request: GET https://api.github.com/repos/pydantic/pydantic/issues?state=all&sort=updated&direction=desc&since=2026-10-10T06%3A10%3A50Z&per_page=100&page=1 "HTTP/1.1 200 OK"
+2026-10-10 20:52:21,904 INFO httpx2: HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 20:52:29,440 INFO httpx2: HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 20:52:33,052 INFO httpx2: HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 20:52:38,955 INFO httpx2: HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 20:52:39,937 INFO httpx2: HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 20:53:00,952 INFO httpx2: HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 20:53:02,735 INFO httpx2: HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 20:53:12,696 INFO httpx2: HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 20:53:50,676 INFO httpx2: HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 20:53:50,680 INFO mergemind.llm: llm critic: length output, retrying once
+2026-10-10 20:53:55,186 INFO httpx2: HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 20:55:08,304 INFO mergemind.evals.triage_eval: [2/3] pydantic/pydantic#11997 -> accept localized=['pydantic/_internal/_generate_schema.py', 'pydantic/functional_validators.py'] truth=['pydantic/_internal/_generate_schema.py', 'pydantic/functional_validators.py', 'pydantic/warnings.py'] tokens=31928/6920 460s 
+2026-10-10 20:55:56,748 INFO httpx: HTTP Request: GET https://api.github.com/repos/pydantic/pydantic/issues?state=all&sort=updated&direction=desc&since=2026-10-10T13%3A06%3A56Z&per_page=100&page=1 "HTTP/1.1 200 OK"
+2026-10-10 20:56:09,542 INFO httpx2: HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 20:56:14,706 INFO httpx2: HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 20:56:21,444 INFO httpx2: HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 20:56:26,914 INFO httpx2: HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 20:56:39,935 INFO httpx2: HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 20:56:46,930 INFO httpx2: HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 20:57:04,442 INFO httpx2: HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 20:57:39,023 INFO httpx2: HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 20:57:55,819 INFO httpx2: HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 20:58:17,379 INFO httpx2: HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 20:58:18,072 INFO mergemind.evals.triage_eval: [3/3] pydantic/pydantic#12732 -> accept localized=['pydantic/_internal/_generics.py', 'pydantic/fields.py', 'pydantic/_internal/_fields.py'] truth=['pydantic/_internal/_generics.py'] tokens=49402/10615 650s 
+pydantic/pydantic: {"issues": 2, "errors": 1, "dispositions": {"accept": 2}, "accept_rate": 1.0, "localization_hit@1": 1.0, "localization_hit@3": 1.0, "accepted_scope_coverage": 0.8333333333333333, "verifier_rejected_rate": 0.0, "repair_rate": 0.5, "tool_calls_median": 5.0, "in_tokens_median": 40665.0, "out_tokens_median": 8767.5, "tokens_median": 49432.5, "tokens_p90": 60017, "seconds_median": 555.35, "seconds_p90": 650.2}
+2026-10-10 21:03:46,541 ERROR opentelemetry.exporter.otlp.proto.http.trace_exporter: Failed to export spans batch due to timeout, max retries or shutdown.
+2026-10-10 21:04:43,945 INFO httpx: HTTP Request: GET https://api.github.com/repos/pytest-dev/pytest/issues?state=all&sort=updated&direction=desc&since=2026-10-10T09%3A11%3A46Z&per_page=100&page=1 "HTTP/1.1 200 OK"
+2026-10-10 21:04:48,111 INFO httpx2: HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 21:05:06,318 INFO httpx: HTTP Request: GET https://api.github.com/repos/pytest-dev/pytest/issues?state=all&sort=updated&direction=desc&since=2026-10-10T09%3A11%3A46Z&per_page=100&page=1 "HTTP/1.1 200 OK"
+2026-10-10 21:05:09,650 INFO httpx2: HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 21:05:12,867 INFO httpx2: HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 21:05:15,468 INFO httpx2: HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 21:05:18,855 INFO httpx: HTTP Request: GET https://api.github.com/repos/pytest-dev/pytest/issues?state=all&sort=updated&direction=desc&since=2026-10-10T09%3A11%3A46Z&per_page=100&page=1 "HTTP/1.1 200 OK"
+2026-10-10 21:05:21,633 INFO httpx2: HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 21:05:24,483 INFO httpx2: HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 21:05:26,097 INFO httpx2: HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 21:05:26,430 INFO httpx2: HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 21:05:27,902 INFO httpx2: HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 21:05:29,060 INFO httpx2: HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 21:05:30,064 INFO httpx2: HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 21:05:31,293 INFO httpx2: HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 21:05:39,655 INFO httpx2: HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 21:05:40,485 INFO httpx2: HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 21:05:40,501 INFO httpx2: HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 21:05:49,858 INFO httpx2: HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 21:05:58,847 INFO httpx2: HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 21:06:12,073 INFO httpx2: HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 21:06:16,256 INFO httpx2: HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 21:06:17,029 INFO httpx2: HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 21:06:21,865 INFO httpx2: HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 21:06:24,006 INFO httpx2: HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 21:06:28,646 INFO httpx2: HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 21:06:28,836 INFO mergemind.triage: verifier rejected report: ["text contains an @mention: 'Create a test with duplicate @pytest.mark.parametrize marker'"]
+2026-10-10 21:06:32,376 INFO httpx2: HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 21:06:32,936 INFO mergemind.evals.triage_eval: [1/3] pytest-dev/pytest#13457 -> escalate localized=['src/_pytest/python.py'] truth=['src/_pytest/python.py'] tokens=77754/4445 494s 
+2026-10-10 21:06:35,268 INFO httpx2: HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 21:06:43,853 INFO httpx2: HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 21:06:44,308 INFO httpx2: HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 21:06:45,246 INFO httpx2: HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 21:07:07,966 INFO httpx2: HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 21:07:08,821 INFO httpx2: HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 21:07:13,962 INFO httpx2: HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 21:07:23,904 INFO httpx2: HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 21:07:30,867 INFO httpx2: HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 21:07:46,458 INFO httpx2: HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 21:07:54,975 INFO httpx2: HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 21:07:55,089 INFO mergemind.evals.triage_eval: [2/3] pytest-dev/pytest#12929 -> escalate localized=['src/_pytest/unraisableexception.py'] truth=['src/_pytest/logging.py'] tokens=35809/2714 577s 
+2026-10-10 21:08:07,405 INFO httpx2: HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 21:08:09,288 INFO httpx2: HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 21:08:26,927 INFO httpx2: HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 21:08:27,888 INFO httpx2: HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 21:08:30,661 INFO httpx2: HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 21:08:37,574 INFO httpx2: HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 21:08:37,744 INFO mergemind.evals.triage_eval: [3/3] pytest-dev/pytest#12444 -> accept localized=['src/_pytest/python_api.py'] truth=['src/_pytest/python_api.py'] tokens=77110/4095 620s 
+pytest-dev/pytest: {"issues": 3, "errors": 0, "dispositions": {"escalate": 2, "accept": 1}, "accept_rate": 0.3333333333333333, "localization_hit@1": 0.6666666666666666, "localization_hit@3": 0.6666666666666666, "accepted_scope_coverage": 1.0, "verifier_rejected_rate": 0.3333333333333333, "repair_rate": 0.0, "tool_calls_median": 10, "in_tokens_median": 77110, "out_tokens_median": 4095, "tokens_median": 81205, "tokens_p90": 82199, "seconds_median": 576.8, "seconds_p90": 619.5}
+{
+  "issues": 8,
+  "errors": 1,
+  "dispositions": {
+    "escalate": 4,
+    "feature_review": 1,
+    "accept": 3
+  },
+  "accept_rate": 0.375,
+  "localization_hit@1": 0.75,
+  "localization_hit@3": 0.75,
+  "accepted_scope_coverage": 0.8888888888888888,
+  "verifier_rejected_rate": 0.375,
+  "repair_rate": 0.125,
+  "tool_calls_median": 10.0,
+  "in_tokens_median": 69182.5,
+  "out_tokens_median": 4957.5,
+  "tokens_median": 73706.5,
+  "tokens_p90": 97234,
+  "seconds_median": 477.5,
+  "seconds_p90": 619.5
+}
+2026-10-10 21:08:38 - neatlogs - INFO - Neatlogs SDK shutdown complete

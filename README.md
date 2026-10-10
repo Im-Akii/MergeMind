@@ -16,11 +16,25 @@ The full design is in [buildplan-v2.md](buildplan-v2.md).
 
 | Milestone | State |
 |---|---|
-| M0 foundation · M1 code intelligence · M2 investigator + verifier · M3 leak guard · M4 access + briefing · M5 PR analysis · M6 merge gate · M7 backtest + recovery | done |
-| M8 v2 improvements + packaging | to do |
+| M0 foundation · M1 code intelligence · M2 investigator + verifier · M3 leak guard · M4 access + briefing · M5 PR analysis · M6 merge gate · M7 backtest + recovery · M8 v2 + packaging | done |
 
-Results so far (450 real issues, leakage-free): MergeMind puts the fixing file in its top 5 for ~77–80% of issues
-vs 44% for the best baseline; full triage costs ~$0.008 per issue at hosted Nemotron prices. See [evidence/](evidence/README.md).
+## Results (v2, leakage-free backtest on 450 real issues and 438 merged fix PRs)
+
+Test split (newest 40%, never used for tuning); `[ ]` = paired bootstrap 95% CI of the v2 − v1 difference.
+Full table: [evidence/eval/v1-vs-v2.md](evidence/eval/v1-vs-v2.md).
+
+| Measure | v1 | v2 |
+|---|---|---|
+| Fix file in MergeMind's top 3 | 0.68 | **0.74** [+0.01, +0.13] |
+| Fix file in the top 5 (best baseline: 0.44) | 0.77 | **0.81** [−0.01, +0.10] |
+| Share of the fix's test files MergeMind names | 0.50 | **0.74** [+0.18, +0.31] |
+| Good PRs held by the safety scan (false alarms), test split | 12% | **5%** [−11, −4 pts] |
+| Fix PRs touching a source file outside the allowed scope, test split | 58% | **47%** [−16, −7 pts] |
+| Full Nemotron triage, 18-issue sample: real bugs accepted | 9/18 | 9/18 (no measurable change) |
+| Leak corpus: secrets / restricted content leaked | 0 | **0** |
+
+All 438 PRs: false-alarm holds 25% → 8%, out-of-scope 61% → 45%. LLM cost of a full triage is ~$0.007 per issue at hosted Nemotron list prices ($0 on the free NVIDIA endpoint);
+see [evidence/cfo/](evidence/cfo/unit_economics.md) and the live cfo.ai business model (https://cfo.ai/s/PG56dy5YWbPcGD_b). Everything else: [evidence/](evidence/README.md).
 
 ## Setup
 
@@ -36,9 +50,10 @@ NEATLOGS_API_KEY=...     # optional: tracing
 GITHUB_TOKEN=...         # see "Token permissions" below
 ```
 
-Recommended: install the [Entire CLI](https://docs.entire.io/installation) and its graph plugin. MergeMind then uses
-entire-graph for code search, definitions and impact (callers, tests, co-changed files); without it, a git-grep fallback
-is used. On the same issue the investigator needed about half the tokens with entire-graph.
+Recommended: install the [Entire CLI](https://docs.entire.io/installation) and its graph plugin. MergeMind then runs
+entire-graph (code search, definitions, impact: callers, tests, co-changed files) next to a git-grep backend and fuses
+the two rankings; without Entire, only the git-grep backend is used. On the same issue the investigator needed about
+half the tokens with entire-graph.
 
 ```powershell
 irm https://entire.io/install.ps1 | iex      # Windows (macOS: brew install --cask entireio/tap/entire; Linux: curl -fsSL https://entire.io/install.sh | bash)
@@ -57,7 +72,19 @@ entire plugin install graph
 | `mergemind sandbox-kit DIR -m <you>` | write a ready-to-push test repo | no |
 | `mergemind preflight --repo o/r` | check token rights, branch protection, workflow, policy | no |
 | `mergemind tick --repo o/r [--dry-run]` | one engine pass | yes (unless `--dry-run` or `autonomy: observe`) |
-| `mergemind run --repo o/r` | engine loop, every 15 s | yes |
+| `mergemind run --repo o/r` | engine loop, every 15 s (laptop mode) | yes |
+| `mergemind actions-kit [DIR]` | write the always-on GitHub Actions runtime into a repo | no |
+| `mergemind eval dataset\|locate\|locate-v2\|triage\|pr-static\|compare\|economics` | the backtests behind `evidence/` | no |
+
+## Always-on with GitHub Actions
+
+`mergemind actions-kit .` writes `.github/workflows/mergemind.yml`: one `tick` per issue, comment, finished
+verify run, and every 10 minutes. State (SQLite) lives on an orphan `mergemind-state` branch, and one run at a
+time is allowed. The API keys go in a GitHub **Environment** named `mergemind` that is limited to the default
+branch. Contributors who get push access can run workflows on their own branches, but those runs can't read the
+keys. The workflow has no `pull_request` trigger and never checks out PR code; PR tests stay in
+`mergemind-verify.yml`, which has no secrets. Environment secrets: `MERGEMIND_TOKEN` (see below), `NVIDIA_API_KEY`
+and, optionally, `NEATLOGS_API_KEY`. Use either this or a laptop `mergemind run` for a repo, never both.
 
 ## Token permissions (fine-grained, one repository only)
 

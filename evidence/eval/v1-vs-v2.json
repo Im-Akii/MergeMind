@@ -1,0 +1,198 @@
+{
+  "localization": {
+    "Hit@1": {
+      "n": 166,
+      "entire": 0.45180722891566266,
+      "fused": 0.4759036144578313,
+      "diff": 0.024096385542168676,
+      "ci": [
+        -0.030120481927710843,
+        0.08433734939759036
+      ]
+    },
+    "Hit@3": {
+      "n": 166,
+      "entire": 0.6746987951807228,
+      "fused": 0.7409638554216867,
+      "diff": 0.06626506024096386,
+      "ci": [
+        0.012048192771084338,
+        0.12650602409638553
+      ]
+    },
+    "Hit@5": {
+      "n": 166,
+      "entire": 0.7650602409638554,
+      "fused": 0.8132530120481928,
+      "diff": 0.04819277108433735,
+      "ci": [
+        -0.006024096385542169,
+        0.10240963855421686
+      ]
+    },
+    "MRR": {
+      "n": 166,
+      "entire": 0.577058232931727,
+      "fused": 0.6232907821763243,
+      "diff": 0.04623254924459744,
+      "ci": [
+        0.00824966532797858,
+        0.08181535666475426
+      ]
+    },
+    "Test recall": {
+      "n": 132,
+      "entire": 0.4974747474747475,
+      "fused": 0.73989898989899,
+      "diff": 0.24242424242424243,
+      "ci": [
+        0.17550505050505052,
+        0.3143939393939394
+      ]
+    }
+  },
+  "pr": {
+    "Safety-scan hold rate on merged fix PRs (lower is better)": {
+      "n": 172,
+      "v1": 0.11627906976744186,
+      "v2": 0.046511627906976744,
+      "diff": -0.06976744186046512,
+      "ci": [
+        -0.11046511627906977,
+        -0.03488372093023256
+      ]
+    },
+    "Fix PRs touching a source file outside the scope (lower is better)": {
+      "n": 170,
+      "v1": 0.5823529411764706,
+      "v2": 0.47058823529411764,
+      "diff": -0.11176470588235295,
+      "ci": [
+        -0.1588235294117647,
+        -0.06470588235294118
+      ]
+    }
+  },
+  "triage": {
+    "Accepted (all sample issues were real, fixed bugs)": {
+      "n": 18,
+      "v1": 0.5,
+      "v2": 0.5,
+      "diff": 0.0,
+      "ci": [
+        -0.2777777777777778,
+        0.2777777777777778
+      ]
+    },
+    "Investigator localization Hit@1": {
+      "n": 18,
+      "v1": 0.5,
+      "v2": 0.5555555555555556,
+      "diff": 0.05555555555555555,
+      "ci": [
+        0.0,
+        0.16666666666666666
+      ]
+    },
+    "Investigator localization Hit@3": {
+      "n": 18,
+      "v1": 0.7222222222222222,
+      "v2": 0.6666666666666666,
+      "diff": -0.05555555555555555,
+      "ci": [
+        -0.16666666666666666,
+        0.0
+      ]
+    },
+    "Verifier rejected the final report (lower is better)": {
+      "n": 18,
+      "v1": 0.05555555555555555,
+      "v2": 0.1111111111111111,
+      "diff": 0.05555555555555555,
+      "ci": [
+        -0.1111111111111111,
+        0.2222222222222222
+      ]
+    }
+  },
+  "triage_cost": {
+    "n": 18,
+    "dispositions_v1": {
+      "accept": 9,
+      "needs_info": 3,
+      "feature_review": 3,
+      "escalate": 2,
+      "duplicate": 1
+    },
+    "dispositions_v2": {
+      "accept": 9,
+      "feature_review": 4,
+      "escalate": 3,
+      "needs_info": 2
+    },
+    "tokens_median_v1": 69380.5,
+    "tokens_median_v2": 55060.0,
+    "seconds_median_v1": 144.4,
+    "seconds_median_v2": 555.7,
+    "cached_calls_v2": 60,
+    "changed": [
+      {
+        "issue": "encode/httpx#1615",
+        "v1": "accept",
+        "v2": "feature_review",
+        "v2_notes": [
+          "feature request (investigator chose needs_info)"
+        ]
+      },
+      {
+        "issue": "encode/httpx#2694",
+        "v1": "needs_info",
+        "v2": "accept",
+        "v2_notes": []
+      },
+      {
+        "issue": "pydantic/pydantic#13148",
+        "v1": "escalate",
+        "v2": "needs_info",
+        "v2_notes": []
+      },
+      {
+        "issue": "pydantic/pydantic#13647",
+        "v1": "duplicate",
+        "v2": "accept",
+        "v2_notes": []
+      },
+      {
+        "issue": "pydantic/pydantic#13860",
+        "v1": "accept",
+        "v2": "escalate",
+        "v2_notes": [
+          "verifier rejected the report twice"
+        ]
+      },
+      {
+        "issue": "pytest-dev/pytest#14004",
+        "v1": "needs_info",
+        "v2": "accept",
+        "v2_notes": []
+      },
+      {
+        "issue": "pytest-dev/pytest#14377",
+        "v1": "accept",
+        "v2": "escalate",
+        "v2_notes": [
+          "verifier rejected the report twice"
+        ]
+      }
+    ]
+  },
+  "leak_corpus": {
+    "leak_cases": 19,
+    "leaks": 0,
+    "leak_rate": 0.0,
+    "held": 1,
+    "benign_cases": 7,
+    "false_redactions": 0,
+    "false_redaction_rate": 0.0
+  }
+}

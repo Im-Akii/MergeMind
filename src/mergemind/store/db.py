@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import sqlite3
+import threading
 import time
 from contextlib import contextmanager
 from importlib import resources
@@ -18,15 +19,34 @@ class VersionConflict(Exception):
 
 
 class Store:
+    """One SQLite connection per thread (WAL lets them read and write concurrently); sharing a
+    connection between threads breaks Python's statement cache under load."""
+
     def __init__(self, path: Path | str):
         self.path = str(path)
-        self.conn = sqlite3.connect(self.path, isolation_level=None, check_same_thread=False)
-        self.conn.row_factory = sqlite3.Row
+        self._local = threading.local()
+        self._main = self._connect()
         schema = resources.files("mergemind.store").joinpath("schema.sql").read_text()
-        self.conn.executescript(schema)
+        self._main.executescript(schema)
+        self._local.conn = self._main
+
+    def _connect(self) -> sqlite3.Connection:
+        conn = sqlite3.connect(self.path, isolation_level=None, check_same_thread=False, timeout=30)
+        conn.row_factory = sqlite3.Row
+        conn.execute("PRAGMA foreign_keys = ON")
+        return conn
+
+    @property
+    def conn(self) -> sqlite3.Connection:
+        c = getattr(self._local, "conn", None)
+        if c is None:
+            # an in-memory database exists only on its own connection: share it (single-threaded tests)
+            c = self._main if self.path == ":memory:" else self._connect()
+            self._local.conn = c
+        return c
 
     def close(self) -> None:
-        self.conn.close()
+        self._main.close()
 
     @contextmanager
     def tx(self) -> Iterator[sqlite3.Connection]:
@@ -42,11 +62,8 @@ class Store:
     # ------------------------------------------------------------------ repos
 
     def repo_id(self, full_name: str) -> int:
-        row = self.conn.execute("SELECT id FROM repos WHERE full_name=?", (full_name,)).fetchone()
-        if row:
-            return row["id"]
-        cur = self.conn.execute("INSERT INTO repos(full_name) VALUES (?)", (full_name,))
-        return int(cur.lastrowid)
+        self.conn.execute("INSERT OR IGNORE INTO repos(full_name) VALUES (?)", (full_name,))
+        return int(self.conn.execute("SELECT id FROM repos WHERE full_name=?", (full_name,)).fetchone()["id"])
 
     def repo_get(self, full_name: str, field: str) -> Any:
         row = self.conn.execute(

@@ -3,13 +3,17 @@
 from __future__ import annotations
 
 import math
+import random
+import statistics
 from collections import Counter
+from typing import Callable
 
 from mergemind.evals.backtest import Row
-from mergemind.evals.metrics import split, summarize
+from mergemind.evals.metrics import hit_at, mrr, split, summarize, test_recall
 
-ORDER = ["entire", "lexical", "mentioned", "recency"]
+ORDER = ["fused", "entire", "lexical", "mentioned", "recency"]
 LABEL = {
+    "fused": "MergeMind v2 (entire-graph + lexical, fused)",
     "entire": "MergeMind (entire-graph)",
     "lexical": "MergeMind, lexical backend (ablation)",
     "mentioned": "Baseline: files named in the issue",
@@ -67,3 +71,39 @@ def locate_report(rows: list[Row], run: str, repos: list[str]) -> tuple[str, dic
     data = {"run": run, "repos": repos, "n_total": len(rows), "n_usable": len(usable), "exclusions": dict(errors),
             "test": s_test, "dev": s_dev, "all": s_all, "per_repo": per_repo}
     return "\n".join(md), data
+
+
+PAIRED: dict[str, Callable[[Row, str], float | None]] = {
+    "Hit@1": lambda r, m: hit_at(r, m, 1),
+    "Hit@3": lambda r, m: hit_at(r, m, 3),
+    "Hit@5": lambda r, m: hit_at(r, m, 5),
+    "MRR": mrr,
+    "Test recall": test_recall,
+}
+
+
+def paired(rows: list[Row], a: str, b: str, n: int = 2000, seed: int = 7) -> dict[str, dict]:
+    """Per metric: mean of `a`, mean of `b`, and the paired bootstrap 95% CI of b - a
+    (same issues resampled for both, so the CI of the difference is tighter than two separate CIs)."""
+    rng = random.Random(seed)
+    out = {}
+    for name, fn in PAIRED.items():
+        pairs = [(fn(r, a), fn(r, b)) for r in rows if a in r.ranked and b in r.ranked]
+        pairs = [(x, y) for x, y in pairs if x is not None and y is not None]
+        if not pairs:
+            continue
+        diffs = [y - x for x, y in pairs]
+        boots = sorted(statistics.fmean(rng.choices(diffs, k=len(diffs))) for _ in range(n))
+        out[name] = {"n": len(pairs), a: statistics.fmean(x for x, _ in pairs), b: statistics.fmean(y for _, y in pairs),
+                     "diff": statistics.fmean(diffs), "ci": (boots[int(0.025 * n)], boots[int(0.975 * n) - 1])}
+    return out
+
+
+def paired_table(res: dict, a: str, b: str, title: str) -> str:
+    lines = [f"### {title}", "", f"| Metric | n | v1 ({a}) | v2 ({b}) | v2 - v1 [95% CI] |", "|---|---|---|---|---|"]
+    for name, d in res.items():
+        lo, hi = d["ci"]
+        sig = " *" if lo > 0 or hi < 0 else ""
+        lines.append(f"| {name} | {d['n']} | {d[a]:.3f} | {d[b]:.3f} | {d['diff']:+.3f} [{lo:+.3f}, {hi:+.3f}]{sig} |")
+    lines += ["", "`*` = the 95% CI of the difference excludes 0."]
+    return "\n".join(lines)

@@ -1,0 +1,99 @@
+# MergeMind always-on runtime (buildplan-v2 §15): one engine pass (`mergemind tick`) per event,
+# with the SQLite state kept on an orphan `mergemind-state` branch.
+#
+# Security model
+# - API keys live in the `mergemind` GitHub Environment, restricted to the default branch
+#   (Settings -> Environments -> mergemind -> Deployment branches: the default branch only).
+#   Contributors that MergeMind gives push access can run workflows on their own branches, but those
+#   jobs cannot read this environment's secrets.
+# - Only events that run on the default branch trigger this workflow (issues, comments, schedule,
+#   the verify workflow finishing). There is deliberately no pull_request / pull_request_target
+#   trigger, and no step checks out or runs PR code: PR tests run in mergemind-verify.yml, which has
+#   no secrets. Maintainer approval arrives as a `/mergemind approve` comment.
+# - One run at a time (concurrency group), so the state branch has a single writer.
+name: mergemind
+
+on:
+  issues:
+    types: [opened, edited, reopened, closed]
+  issue_comment:
+    types: [created]
+  workflow_run:  # a PR's tests finished: analyse it now instead of at the next schedule
+    workflows: [mergemind-verify]
+    types: [completed]
+  schedule:
+    - cron: "*/10 * * * *"  # timers: access check-ins, expiries, CI timeouts, post-merge watch
+  workflow_dispatch:
+
+permissions:
+  contents: write  # push the state branch only; merges and invites use MERGEMIND_TOKEN
+  actions: read
+
+concurrency:
+  group: mergemind-engine
+  cancel-in-progress: false
+
+jobs:
+  tick:
+    if: github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    environment: mergemind
+    env:
+      MERGEMIND_DB: ${{ github.workspace }}/.mergemind-state/mergemind.db
+      MERGEMIND_WORK_DIR: ${{ runner.temp }}/mergemind
+      MERGEMIND_REF: ${{ vars.MERGEMIND_REF || 'main' }}  # pin to a commit SHA in production
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install MergeMind
+        run: pip install "git+https://github.com/Im-Akii/MergeMind.git@${MERGEMIND_REF}"
+
+      - name: Install entire-graph (optional; MergeMind falls back to git grep without it)
+        continue-on-error: true
+        run: |
+          curl -fsSL https://entire.io/install.sh | bash
+          entire plugin install graph
+
+      - name: Restore state
+        run: |
+          mkdir -p .mergemind-state
+          if git fetch --depth=1 origin mergemind-state 2>/dev/null; then
+            git show FETCH_HEAD:mergemind.db > "$MERGEMIND_DB"
+            echo "restored state from mergemind-state"
+          else
+            echo "no state branch yet: starting fresh"
+          fi
+
+      - name: Engine pass
+        env:
+          GITHUB_TOKEN: ${{ secrets.MERGEMIND_TOKEN }}  # fine-grained PAT or App token (needs Administration for invites)
+          NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
+          NEATLOGS_API_KEY: ${{ secrets.NEATLOGS_API_KEY }}
+        run: mergemind tick --repo "$GITHUB_REPOSITORY"
+
+      - name: Save state
+        if: always()
+        env:
+          GIT_AUTHOR_NAME: mergemind
+          GIT_AUTHOR_EMAIL: mergemind@users.noreply.github.com
+          GIT_COMMITTER_NAME: mergemind
+          GIT_COMMITTER_EMAIL: mergemind@users.noreply.github.com
+        run: |
+          [ -f "$MERGEMIND_DB" ] || exit 0
+          python - "$MERGEMIND_DB" <<'PY'
+          import sqlite3, sys
+          c = sqlite3.connect(sys.argv[1])
+          c.execute("PRAGMA wal_checkpoint(TRUNCATE)")
+          c.close()
+          PY
+          blob=$(git hash-object -w "$MERGEMIND_DB")
+          tree=$(printf '100644 blob %s\tmergemind.db\n' "$blob" | git mktree)
+          commit=$(git commit-tree "$tree" -m "mergemind state ${GITHUB_RUN_ID}")
+          git push --force origin "$commit:refs/heads/mergemind-state"

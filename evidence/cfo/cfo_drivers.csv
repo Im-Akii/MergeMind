@@ -1,13 +1,13 @@
 driver,value,unit,source
-triage_cost_per_issue_median_usd,0.007931,USD,"measured, n=18 backtest issues"
-triage_cost_per_issue_p90_usd,0.011793,USD,measured
-triage_tokens_per_issue_median,69380.5,tokens,measured
-triage_tokens_per_issue_p90,86962,tokens,measured
-pr_review_cost_median_usd,0.000448,USD,"measured live, n=2"
+triage_cost_per_issue_median_usd,0.006922,USD,"measured, n=18 backtest issues"
+triage_cost_per_issue_p90_usd,0.010828,USD,measured
+triage_tokens_per_issue_median,55060.0,tokens,measured
+triage_tokens_per_issue_p90,87949,tokens,measured
+pr_review_cost_median_usd,0.000528,USD,"measured live, n=5"
 accepted_issue_share,0.5,ratio,measured (backtest dispositions)
 pr_reviews_per_accepted_issue,2.0,count,assumption
-llm_cost_per_issue_all_in_median_usd,0.008378,USD,derived
-llm_cost_per_issue_all_in_p90_usd,0.012321,USD,derived
+llm_cost_per_issue_all_in_median_usd,0.00745,USD,derived
+llm_cost_per_issue_all_in_p90_usd,0.011516,USD,derived
 hosted_compute_per_repo_month_usd,0.5,USD,assumption
 free_tier_marginal_cost_usd,0.0,USD,GitHub Actions on public repos + bring-your-own NVIDIA key
 price_in_per_1M__nvidia/nemotron-3-super-120b-a12b,0.1,USD,public list price
@@ -17,8 +17,8 @@ price_out_per_1M__nvidia/nemotron-3.5-lightning-30b-a3b,0.2,USD,public list pric
 price_in_per_1M__nvidia/nemotron-3-ultra-550b-a55b,0.6,USD,public list price
 price_out_per_1M__nvidia/nemotron-3-ultra-550b-a55b,2.4,USD,public list price
 scenario_issues_per_month__small OSS repo,15,issues,assumption
-scenario_cost_per_repo_month__small OSS repo,0.684813,USD,"derived (p90 cost, conservative)"
+scenario_cost_per_repo_month__small OSS repo,0.672745,USD,"derived (p90 cost, conservative)"
 scenario_issues_per_month__active OSS repo,80,issues,assumption
-scenario_cost_per_repo_month__active OSS repo,1.485672,USD,"derived (p90 cost, conservative)"
+scenario_cost_per_repo_month__active OSS repo,1.421308,USD,"derived (p90 cost, conservative)"
 scenario_issues_per_month__busy repo / internal team,300,issues,assumption
-scenario_cost_per_repo_month__busy repo / internal team,4.19627,USD,"derived (p90 cost, conservative)"
+scenario_cost_per_repo_month__busy repo / internal team,3.954905,USD,"derived (p90 cost, conservative)"

@@ -80,7 +80,78 @@ def pr_costs(store_path: Path, model: str) -> tuple[CostPoint, dict]:
     return CostPoint(statistics.median(vals), _p(vals, 0.9)), {"n": len(vals)}
 
 
-def build(triage_rows: list[dict], store_path: Path, investigator_model: str, out_dir: Path) -> str:
+# Business assumptions for the cfo.ai model: example values to replace with your own (not measured).
+TIERS = {  # name: (price per month USD, repos per account, issues per repo per month, who pays inference)
+    "Free (self-hosted Action, BYO NVIDIA key)": (0, 1, 15, "maintainer"),
+    "Pro (hosted, per repo)": (19, 1, 80, "us"),
+    "Team (hosted, up to 10 private repos)": (149, 10, 80, "us"),
+}
+SCENARIOS = {  # name: (new free repos / month, free -> paid conversion / month, monthly churn, LLM price x)
+    "Base": (200, 0.02, 0.03, 1.0),
+    "Growth": (600, 0.03, 0.02, 1.0),
+    "Downside": (80, 0.01, 0.05, 2.0),
+}
+
+
+def entry_sheet(unit_med: float, unit_p90: float, run: str) -> str:
+    """Step-by-step sheet for building the business model by hand in cfo.ai (it has no import API)."""
+    def tier_cost(repos: int, issues: int, price_x: float = 1.0) -> float:
+        return repos * (issues * unit_p90 * price_x + HOSTED_COMPUTE_PER_REPO_MONTH)
+
+    lines = [
+        "# cfo.ai entry sheet", "",
+        f"Measured inputs come from the `{run}` backtest ([unit_economics.md](unit_economics.md), "
+        "[cfo_drivers.csv](cfo_drivers.csv)). Rows marked *example* are business assumptions: replace them with yours. "
+        "cfo.ai has no import API, so enter these by hand, in this order (or describe them to cfo.ai's assistant, "
+        "Ari, which builds the pages). Built model: https://cfo.ai/s/PG56dy5YWbPcGD_b", "",
+        "## 1. Model setup", "",
+        "Create a model `MergeMind`, monthly, 24 months, currency USD.", "",
+        "## 2. Drivers (inputs)", "",
+        "| Driver | Value | Kind |", "|---|---|---|",
+        f"| LLM cost per issue, p90 (all-in: triage + PR reviews) | {unit_p90:.4f} | measured |",
+        f"| LLM cost per issue, median | {unit_med:.4f} | measured |",
+        f"| Hosted compute per paid repo per month | {HOSTED_COMPUTE_PER_REPO_MONTH:.2f} | example |",
+    ]
+    for name, (price, repos, issues, _) in TIERS.items():
+        lines.append(f"| {name}: price / month | {price} | example |")
+        lines.append(f"| {name}: repos per account | {repos} | example |")
+        lines.append(f"| {name}: issues per repo / month | {issues} | example |")
+    lines += ["| Starting cash | your number | input |", "| Team cost / month (salaries, tools) | your number | input |",
+              "| Free repos at month 0 | 0 | example |", "",
+              "## 3. Formulas (one row each, per month)", "",
+              "```",
+              "free_repos[t]   = free_repos[t-1] * (1 - churn) + new_free_repos",
+              "pro_accounts[t] = pro_accounts[t-1] * (1 - churn) + free_repos[t-1] * conversion * 0.8",
+              "team_accounts[t]= team_accounts[t-1] * (1 - churn) + free_repos[t-1] * conversion * 0.2",
+              "revenue         = pro_accounts * pro_price + team_accounts * team_price",
+              "cogs            = (pro_accounts * pro_repos + team_accounts * team_repos)",
+              "                  * (issues_per_repo * llm_cost_per_issue_p90 * llm_price_x + hosted_compute_per_repo)",
+              "gross_margin    = (revenue - cogs) / revenue",
+              "net_burn        = team_cost + cogs - revenue",
+              "cash[t]         = cash[t-1] - net_burn",
+              "runway_months   = cash / net_burn            (while net_burn > 0)",
+              "```", "",
+              "Free repos cost us nothing: the maintainer runs the GitHub Action with their own (free) NVIDIA key.", "",
+              "## 4. Scenarios", "",
+              "| Scenario | New free repos / month | Conversion / month | Churn / month | LLM price multiplier |",
+              "|---|---|---|---|---|"]
+    for name, (new, conv, churn, px) in SCENARIOS.items():
+        lines.append(f"| {name} | {new} | {conv:.0%} | {churn:.0%} | {px:g}x |")
+    lines += ["", "## 5. Check your model against these unit numbers", "",
+              "| Tier | Price / month | COGS / month (p90) | Gross margin | COGS at 2x LLM price |", "|---|---|---|---|---|"]
+    for name, (price, repos, issues, payer) in TIERS.items():
+        if payer != "us":
+            lines.append(f"| {name} | $0 | $0 | — | $0 |")
+            continue
+        c, c2 = tier_cost(repos, issues), tier_cost(repos, issues, 2.0)
+        lines.append(f"| {name} | ${price} | ${c:.2f} | {(price - c) / price:.0%} | ${c2:.2f} |")
+    lines += ["", "If cfo.ai shows different margins for these tiers, a formula is off. Sensitivities worth a "
+              "chart: tokens per issue (model choice, reasoning on/off), LLM price multiplier, conversion, churn."]
+    return "\n".join(lines) + "\n"
+
+
+def build(triage_rows: list[dict], store_path: Path, investigator_model: str, out_dir: Path,
+          run: str = "v1") -> str:
     tri, tri_d = triage_costs(triage_rows)
     pr, pr_d = pr_costs(store_path, investigator_model)
     accept = tri_d.get("accept_share") or ACCEPT_SHARE_FALLBACK
@@ -122,7 +193,7 @@ def build(triage_rows: list[dict], store_path: Path, investigator_model: str, ou
 
     lines = [
         "# MergeMind unit economics (inputs for cfo.ai)", "",
-        "Measured from the v1 backtest (time-travelled triage on real issues) and live PR reviews on the sandbox. "
+        f"Measured from the {run} backtest (time-travelled triage on real issues) and live PR reviews on the sandbox. "
         "Prices are public list prices for hosted Nemotron (sources at the end). Volumes are assumptions to edit in cfo.ai.",
         "", "## Cost per unit", "",
         "| Unit | Median | p90 |", "|---|---|---|",
@@ -153,6 +224,7 @@ def build(triage_rows: list[dict], store_path: Path, investigator_model: str, ou
     ]
     md = "\n".join(lines)
     (out_dir / "unit_economics.md").write_text(md, encoding="utf-8")
+    (out_dir / "cfo_entry_sheet.md").write_text(entry_sheet(unit_med, unit_p90, run), encoding="utf-8")
     (out_dir / "unit_economics.json").write_text(json.dumps({
         "triage": {"median": tri.median, "p90": tri.p90, **tri_d}, "pr_review": {"median": pr.median, "p90": pr.p90, **pr_d},
         "all_in_per_issue": {"median": unit_med, "p90": unit_p90}, "prices": PRICES}, indent=2), encoding="utf-8")
