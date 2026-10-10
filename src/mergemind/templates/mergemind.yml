@@ -35,13 +35,13 @@ concurrency:
 
 jobs:
   tick:
-    if: github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+    # scheduled runs always use the default branch (and their payload has no repository field)
+    if: github.event_name == 'schedule' || github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
     runs-on: ubuntu-latest
     timeout-minutes: 25
     environment: mergemind
-    env:
+    env:  # job-level env may only use github / vars / secrets / inputs contexts (no runner.*)
       MERGEMIND_DB: ${{ github.workspace }}/.mergemind-state/mergemind.db
-      MERGEMIND_WORK_DIR: ${{ runner.temp }}/mergemind
       MERGEMIND_REF: ${{ vars.MERGEMIND_REF || 'main' }}  # pin to a commit SHA in production
     steps:
       - uses: actions/checkout@v4
@@ -76,6 +76,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.MERGEMIND_TOKEN }}  # fine-grained PAT or App token (needs Administration for invites)
           NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
           NEATLOGS_API_KEY: ${{ secrets.NEATLOGS_API_KEY }}
+          MERGEMIND_WORK_DIR: ${{ runner.temp }}/mergemind
         run: mergemind tick --repo "$GITHUB_REPOSITORY"
 
       - name: Save state

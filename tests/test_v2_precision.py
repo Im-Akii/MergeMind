@@ -215,6 +215,10 @@ def test_actions_runtime_never_runs_pr_code_and_keeps_secrets_on_the_default_bra
     assert "default_branch" in job["if"]
     assert wf["concurrency"]["cancel-in-progress"] is False
     assert not any("ref" in (s.get("with") or {}) for s in job["steps"])  # checks out the default branch only
+    # GitHub rejects the whole file if job-level env uses a context only steps have (e.g. runner.*)
+    assert not any("runner." in str(v) for v in job["env"].values())
+    # scheduled runs have no repository in their payload: the guard must still let them through
+    assert "schedule" in job["if"]
 
 
 def test_identifier_rule_does_not_hide_random_tokens():
