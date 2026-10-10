@@ -1,0 +1,110 @@
+# MergeMind: untrusted PR tests (buildplan-v2 §7.5).
+# Runs contributor code with a read-only token and no secrets. MergeMind reads the
+# results of the `tests` and `regression` jobs as check runs; it never runs PR code itself.
+name: mergemind-verify
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  # the default branch is tested after every merge; MergeMind proposes a revert if this fails
+  push:
+    branches: [main, master]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mergemind-verify-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  tests:
+    name: tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f pyproject.toml ] || [ -f setup.py ]; then pip install -e . ; fi
+          if [ -f requirements.txt ]; then pip install -r requirements.txt ; fi
+          pip install pytest
+      - name: Full test suite
+        run: python -m pytest -q -rfE
+
+  detect:
+    name: detect-tests
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      has_tests: ${{ steps.find.outputs.has_tests }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - id: find
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          # file names are contributor-controlled: never interpolate them into scripts
+          if git diff --name-only --diff-filter=AM "$BASE_SHA" HEAD -- 'test_*.py' '*/test_*.py' '*_test.py' | grep -q .; then
+            echo "has_tests=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_tests=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  regression:
+    name: regression
+    needs: detect
+    if: github.event_name == 'pull_request' && needs.detect.outputs.has_tests == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f pyproject.toml ] || [ -f setup.py ]; then pip install -e . ; fi
+          if [ -f requirements.txt ]; then pip install -r requirements.txt ; fi
+          pip install pytest
+      - name: New tests fail without the fix and pass with it
+        shell: bash
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          set -euo pipefail
+          tests_spec=('test_*.py' '*/test_*.py' '*_test.py')
+          excl=(':(exclude)test_*.py' ':(exclude)*/test_*.py' ':(exclude)*_test.py')
+          mapfile -d '' tests < <(git diff --name-only -z --diff-filter=AM "$BASE_SHA" HEAD -- "${tests_spec[@]}")
+          mapfile -d '' modified < <(git diff --name-only -z --diff-filter=MR "$BASE_SHA" HEAD -- '*.py' "${excl[@]}")
+          mapfile -d '' added < <(git diff --name-only -z --diff-filter=A "$BASE_SHA" HEAD -- '*.py' "${excl[@]}")
+
+          echo "::group::1. new tests with the fix"
+          python -m pytest -q -rfE -- "${tests[@]}" || { echo "::error::the new tests fail with the fix"; exit 1; }
+          echo "::endgroup::"
+
+          if [ ${#modified[@]} -eq 0 ] && [ ${#added[@]} -eq 0 ]; then
+            echo "::error::the PR changes no code for the tests to check"; exit 1
+          fi
+          echo "::group::2. same tests with the code reset to the base branch"
+          if [ ${#modified[@]} -gt 0 ]; then git checkout "$BASE_SHA" -- "${modified[@]}"; fi
+          if [ ${#added[@]} -gt 0 ]; then rm -f -- "${added[@]}"; fi
+          if python -m pytest -q -- "${tests[@]}"; then
+            echo "::error::the new tests also pass without the fix, so they don't test it"; exit 1
+          fi
+          echo "::endgroup::"
+          echo "regression test confirmed: fails without the fix, passes with it"
