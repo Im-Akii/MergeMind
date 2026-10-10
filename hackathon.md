@@ -124,8 +124,8 @@ uv run mergemind actions-kit .                                              # al
 uv run pytest -q                                                            # 160 tests, scenarios S1–S16
 ```
 
-The keys go in `.env.local` (`NVIDIA_API_KEY`, `GITHUB_TOKEN`, optional `NEATLOGS_API_KEY`). The step-by-step
-end-to-end test is in [MANUAL_TEST_PLAN.md](MANUAL_TEST_PLAN.md); the full design is in
+The keys go in `.env.local` (`NVIDIA_API_KEY`, `GITHUB_TOKEN`, optional `NEATLOGS_API_KEY`). For the end-to-end
+run, `sandbox-kit` writes a `KIT_STEPS.md` guide into the sandbox it creates; the full design is in
 [buildplan-v2.md](buildplan-v2.md).
 
 ## Honest limits
