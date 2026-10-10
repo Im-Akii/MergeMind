@@ -18,3 +18,9 @@ wheels/
 *.db-shm
 .mergemind/
 
+
+# Local AI-assistant and Entire dev-session config (kept on disk, never published)
+CLAUDE.md
+AGENTS.md
+.claude/
+.entire/
