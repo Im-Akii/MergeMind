@@ -402,13 +402,27 @@ def _verdict(ctx: Context, state: IssueState):
     return PRVerdict.model_validate_json(row["verdict_json"]) if row and row["verdict_json"] else None
 
 
+def _branch_only_commits(ctx: Context, repo: str, base_ref: str, head: str) -> list[dict]:
+    """Commits on `head` that are not on the base branch (the PR's own commits)."""
+    cmp = ctx.gh.request("GET", f"/repos/{repo}/compare/{base_ref}...{head}", point="gh.compare")
+    return cmp.get("commits") or []
+
+
 def _update_only(ctx: Context, repo: str, old_head: str, new_head: str, base_ref: str) -> tuple[bool, str]:
-    """True if old_head..new_head is exactly one GitHub-made merge of the base branch."""
-    cmp = ctx.gh.request("GET", f"/repos/{repo}/compare/{old_head}...{new_head}", point="gh.compare")
-    commits = cmp.get("commits") or []
-    if len(commits) != 1:
-        return False, f"{len(commits)} new commits since approval, expected only the base-branch update"
-    c = commits[0]
+    """True if the only change from old_head to new_head is one GitHub-made merge of the base branch.
+
+    Compared against the base: the commits merged in *from* the base are already on it, so the
+    PR's own commits before and after the update must differ by exactly that merge commit.
+    (Comparing old_head...new_head directly would also list every merged-in base commit.)"""
+    before = {c["sha"] for c in _branch_only_commits(ctx, repo, base_ref, old_head)}
+    after = _branch_only_commits(ctx, repo, base_ref, new_head)
+    added = [c for c in after if c["sha"] not in before]
+    if len(added) != 1:
+        return False, (f"{len(added)} commits not on {base_ref} were added since approval, "
+                       "expected only GitHub's update merge")
+    c = added[0]
+    if c["sha"] != new_head:
+        return False, "the PR head is not the update merge itself"
     parents = [x["sha"] for x in c.get("parents", [])]
     if len(parents) != 2 or parents[0] != old_head:
         return False, "the new commit is not a merge of the base branch into the approved commit"

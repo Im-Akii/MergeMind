@@ -23,7 +23,7 @@ class MergeGH(PRGH):
         self.reviews: list[dict] = []
         self.merges: list[dict] = []
         self.created_prs: list[dict] = []
-        self.compare: dict[tuple[str, str], dict] = {}
+        self.committer_login: dict[str, str] = {}  # sha -> GitHub login of the committer (default: contributor)
         self.merge_error: GitHubError | None = None
         self.on_update_branch = None
         self.main_statuses: list[dict] = []
@@ -45,13 +45,29 @@ class MergeGH(PRGH):
             return {"sha": "m3rg3d0000000000000000000000000000000000", "merged": True}
         if "/compare/" in path:
             a, b = path.split("/compare/")[1].split("...")
-            return self.compare[(a, b)]
+            return self._compare(a, b)
         if path.endswith("/status") and method == "GET":
             return {"statuses": self.main_statuses}
         if path.endswith("/pulls") and method == "POST":
             self.created_prs.append(json_body)
             return {"number": 99}
         return super().request(method, path, point=point, params=params, json_body=json_body, use_etag=use_etag)
+
+    def _compare(self, base: str, head: str) -> dict:
+        """GitHub's compare API, computed from the real local repo: `commits` are the commits
+        reachable from head but not from base (oldest first), including merged-in ones."""
+        def rev(x):
+            return git(self.path, "rev-parse", "main" if x == "main" else x)
+
+        b, h = rev(base), rev(head)
+        lines = [ln for ln in git(self.path, "rev-list", "--reverse", "--parents", h, f"^{b}").splitlines() if ln]
+        commits = [{"sha": ln.split()[0], "parents": [{"sha": p} for p in ln.split()[1:]],
+                    "committer": {"login": self.committer_login.get(ln.split()[0], "Im-Akii")}} for ln in lines]
+        behind = len([ln for ln in git(self.path, "rev-list", b, f"^{h}").splitlines() if ln])
+        ahead = len(commits)
+        status = "identical" if not ahead and not behind else "ahead" if not behind else "behind" if not ahead \
+            else "diverged"
+        return {"status": status, "ahead_by": ahead, "behind_by": behind, "commits": commits}
 
 
 class RecordingCache(FakeCache):
@@ -171,11 +187,12 @@ def test_S11_push_after_approval_voids_it(m):
     assert st.data["verified_head_sha"] == head2
 
 
-def _move_base(m):
-    """Someone merges another change into main after verification."""
+def _move_base(m, commits: int = 3):
+    """Someone merges other changes into main after verification (several commits, like a real PR)."""
     git(m.repo, "checkout", "-q", "main")
-    (m.repo / "README.md").write_text("# shopcart\n\nUpdated docs.\n")
-    git(m.repo, "commit", "-qam", "docs")
+    for i in range(commits):
+        (m.repo / "README.md").write_text(f"# shopcart\n\nUpdated docs {i}.\n")
+        git(m.repo, "commit", "-qam", f"docs {i}")
     new_base = git(m.repo, "rev-parse", "HEAD")
     git(m.repo, "update-ref", "refs/remotes/origin/main", new_base)
     m.gh.base_tip = new_base
@@ -184,15 +201,17 @@ def _move_base(m):
 
 def _github_update_branch(m, old_head, new_base, committer="web-flow", extra_commit=False):
     def update():
+        """GitHub's update-branch: a merge of main into the PR branch, committed by web-flow."""
         git(m.repo, "checkout", "-q", "good")
         git(m.repo, "merge", "-q", "--no-edit", "main")
         new_head = git(m.repo, "rev-parse", "HEAD")
+        m.gh.committer_login[new_head] = committer
+        if extra_commit:  # the contributor sneaks in another commit on top
+            (m.repo / "shopcart" / "extra.py").write_text("X = 1\n")
+            git(m.repo, "add", ".")
+            git(m.repo, "commit", "-qm", "sneaky")
+            new_head = git(m.repo, "rev-parse", "HEAD")
         git(m.repo, "checkout", "-q", "main")
-        commits = [{"sha": new_head, "parents": [{"sha": old_head}, {"sha": new_base}], "committer": {"login": committer}}]
-        if extra_commit:
-            commits.insert(0, {"sha": "x", "parents": [{"sha": old_head}], "committer": {"login": "Im-Akii"}})
-        m.gh.compare[(old_head, new_head)] = {"commits": commits}
-        m.gh.compare[(new_base, "main")] = {"status": "identical"}
         m.gh.pr["head"]["sha"] = new_head
         m.gh.checks_by_sha[new_head] = [
             {"id": 21, "name": "tests", "status": "completed", "conclusion": "success", "started_at": "2"},
@@ -325,7 +344,6 @@ def test_verdict_without_recorded_base_asks_github(m):
     v.pop("base_sha")
     m.ctx.store.conn.execute("UPDATE runs SET verdict_json=? WHERE id=?", (_json.dumps(v), rid))
     new_base = _move_base(m)
-    m.gh.compare[(head, new_base)] = {"ahead_by": 1}
     m.gh.on_update_branch = _github_update_branch(m, head, new_base)
     comment(m, "alice", "/mergemind approve")
     tick(m.ctx, [REPO])
@@ -356,3 +374,15 @@ def test_S16a_rate_limited_merge_retries_at_reset(m):
     assert timer and abs(timer["due_at"] - reset) < 1
     tick(m.ctx, [REPO], now=reset + 1)
     assert m.gh.merges and phase(m) == Phase.POST_MERGE_WATCH
+
+
+def test_update_merging_many_base_commits_keeps_approval(m):
+    """Regression (live sandbox, PR #2): main moved by several commits; the update merge brings all
+    of them in. Only the merge commit is new to the PR, so the approval must carry over."""
+    head = ready(m)
+    new_base = _move_base(m, commits=4)
+    m.gh.on_update_branch = _github_update_branch(m, head, new_base)
+    comment(m, "alice", "/mergemind approve")
+    tick(m.ctx, [REPO])
+    tick(m.ctx, [REPO])
+    assert m.gh.merges and m.gh.merges[0]["sha"] == m.new_head

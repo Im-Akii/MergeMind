@@ -1,0 +1,33 @@
+{
+  "triage": {
+    "median": 0.007930625,
+    "p90": 0.0117929,
+    "n": 18,
+    "tokens_median": 69380.5,
+    "tokens_p90": 86962,
+    "accept_share": 0.5
+  },
+  "pr_review": {
+    "median": 0.0004477,
+    "p90": 0.000528,
+    "n": 2
+  },
+  "all_in_per_issue": {
+    "median": 0.008378325,
+    "p90": 0.012320900000000001
+  },
+  "prices": {
+    "nvidia/nemotron-3-super-120b-a12b": [
+      0.1,
+      0.5
+    ],
+    "nvidia/nemotron-3.5-lightning-30b-a3b": [
+      0.05,
+      0.2
+    ],
+    "nvidia/nemotron-3-ultra-550b-a55b": [
+      0.6,
+      2.4
+    ]
+  }
+}

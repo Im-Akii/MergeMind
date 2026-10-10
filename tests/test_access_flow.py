@@ -92,6 +92,8 @@ class FakeGH:
                 return {"id": 1}
             if method == "DELETE":
                 self.collaborators.discard(login)
+                if self.perms.get(login) == "write":  # removal drops the access we granted
+                    self.perms.pop(login)
                 return None
             if login in self.collaborators:
                 return None
@@ -286,3 +288,17 @@ def test_S16b_permission_denied_invite_blocks_without_retry(tmp_path):
     assert phase(ctx) == Phase.PERMISSION_BLOCKED
     assert "lacks a GitHub permission" in gh.bodies()
     assert ctx.store.conn.execute("SELECT COUNT(*) FROM timers WHERE kind='retry_effect'").fetchone()[0] == 0
+
+
+def test_author_can_contribute_again_after_withdrawing(tmp_path):
+    ctx, gh = setup(tmp_path)
+    gh.user_comment("rita", "/contribute")
+    tick(ctx, [REPO])
+    gh.accept_invite("rita")
+    tick(ctx, [REPO])
+    gh.user_comment("rita", "/mergemind withdraw")
+    tick(ctx, [REPO])
+    assert phase(ctx) == Phase.ACCEPTED_UNCLAIMED and "rita" not in gh.collaborators
+    gh.user_comment("rita", "/contribute")
+    tick(ctx, [REPO])
+    assert phase(ctx) == Phase.ACCESS_GRANTED and list(gh.invitations.values()) == ["rita"]

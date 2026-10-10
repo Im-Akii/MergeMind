@@ -1,0 +1,99 @@
+{
+  "run": "v1",
+  "model_investigator": "nvidia/nemotron-3-super-120b-a12b",
+  "model_fast": "nvidia/nemotron-3.5-lightning-30b-a3b",
+  "all": {
+    "issues": 18,
+    "errors": 0,
+    "dispositions": {
+      "accept": 9,
+      "needs_info": 3,
+      "escalate": 2,
+      "feature_review": 3,
+      "duplicate": 1
+    },
+    "accept_rate": 0.5,
+    "localization_hit@1": 0.5,
+    "localization_hit@3": 0.7222222222222222,
+    "accepted_scope_coverage": 0.8333333333333334,
+    "verifier_rejected_rate": 0.05555555555555555,
+    "repair_rate": 0.2222222222222222,
+    "tool_calls_median": 9.5,
+    "in_tokens_median": 65604.5,
+    "out_tokens_median": 3905.5,
+    "tokens_median": 69380.5,
+    "tokens_p90": 86962,
+    "seconds_median": 144.4,
+    "seconds_p90": 198.1
+  },
+  "per_repo": {
+    "encode/httpx": {
+      "issues": 6,
+      "errors": 0,
+      "dispositions": {
+        "accept": 5,
+        "needs_info": 1
+      },
+      "accept_rate": 0.8333333333333334,
+      "localization_hit@1": 0.6666666666666666,
+      "localization_hit@3": 1.0,
+      "accepted_scope_coverage": 1.0,
+      "verifier_rejected_rate": 0.0,
+      "repair_rate": 0.0,
+      "tool_calls_median": 10.0,
+      "in_tokens_median": 63240.5,
+      "out_tokens_median": 3789.0,
+      "tokens_median": 66375.5,
+      "tokens_p90": 76559,
+      "seconds_median": 79.9,
+      "seconds_p90": 178.3
+    },
+    "pydantic/pydantic": {
+      "issues": 6,
+      "errors": 0,
+      "dispositions": {
+        "escalate": 1,
+        "needs_info": 1,
+        "feature_review": 1,
+        "duplicate": 1,
+        "accept": 2
+      },
+      "accept_rate": 0.3333333333333333,
+      "localization_hit@1": 0.3333333333333333,
+      "localization_hit@3": 0.5,
+      "accepted_scope_coverage": 0.5,
+      "verifier_rejected_rate": 0.16666666666666666,
+      "repair_rate": 0.3333333333333333,
+      "tool_calls_median": 10.0,
+      "in_tokens_median": 74271.0,
+      "out_tokens_median": 8694.0,
+      "tokens_median": 84077.5,
+      "tokens_p90": 99484,
+      "seconds_median": 183.3,
+      "seconds_p90": 261.6
+    },
+    "pytest-dev/pytest": {
+      "issues": 6,
+      "errors": 0,
+      "dispositions": {
+        "feature_review": 2,
+        "needs_info": 1,
+        "accept": 2,
+        "escalate": 1
+      },
+      "accept_rate": 0.3333333333333333,
+      "localization_hit@1": 0.5,
+      "localization_hit@3": 0.6666666666666666,
+      "accepted_scope_coverage": 0.75,
+      "verifier_rejected_rate": 0.0,
+      "repair_rate": 0.3333333333333333,
+      "tool_calls_median": 9.0,
+      "in_tokens_median": 59168.0,
+      "out_tokens_median": 2471.0,
+      "tokens_median": 61509.0,
+      "tokens_p90": 76809,
+      "seconds_median": 144.4,
+      "seconds_p90": 198.1
+    }
+  }
+}

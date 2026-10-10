@@ -115,7 +115,7 @@ def transition(
         return s, [_card(s), Effect(kind="notify_maintainers", payload={"reason": "triage_failed", **p})]
 
     # ---- access -------------------------------------------------------------
-    if kind == "access_granted" and state.phase == P.ACCESS_OFFERED:
+    if kind == "access_granted" and state.phase in (P.ACCESS_OFFERED, P.ACCEPTED_UNCLAIMED):
         mode = p.get("mode", "collaborator")
         # fork / already-has-access: nothing to accept, work starts now
         phase = P.ACCESS_GRANTED if mode == "collaborator" else P.WORKING
@@ -124,7 +124,7 @@ def transition(
         return s, [_card(s), Effect(kind="post_briefing", payload={"lease_id": p.get("lease_id")}),
                    *_lease_timers(policy, now)]
 
-    if kind == "access_denied" and state.phase == P.ACCESS_OFFERED:
+    if kind == "access_denied" and state.phase in (P.ACCESS_OFFERED, P.ACCEPTED_UNCLAIMED):
         s = state.model_copy(update={"contributor": None})
         effects = [Effect(kind="post_comment", payload={"template": "access_denied", "reason": p.get("reason", ""),
                                                         "to": p.get("login")})]
@@ -331,7 +331,8 @@ def _command(
         return state, [Effect(kind="post_comment", payload={"template": "why"})]
 
     if name == "contribute":
-        if ph != P.ACCESS_OFFERED:
+        # also after an earlier attempt ended (expired, withdrawn, declined, revoked)
+        if ph not in (P.ACCESS_OFFERED, P.ACCEPTED_UNCLAIMED):
             return deny("this issue is not open for contribution right now")
         if author != state.author:
             return deny("only the issue author can request access for this issue")
