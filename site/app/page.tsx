@@ -1,5 +1,7 @@
 import AutonomyDial from "@/components/AutonomyDial";
 import Conveyor from "@/components/Conveyor";
+import Dock from "@/components/Dock";
+import { GuideProvider } from "@/components/Guide";
 import Hero from "@/components/Hero";
 import Rail from "@/components/Rail";
 import Steps from "@/components/Steps";
@@ -71,6 +73,7 @@ export default function Page() {
           </div>
         </section>
 
+        <GuideProvider>
         <div className="band alt">
           <div className="wrap manual">
             <Rail />
@@ -296,6 +299,8 @@ export default function Page() {
             </div>
           </div>
         </div>
+        <Dock />
+        </GuideProvider>
       </main>
 
       <footer className="foot">

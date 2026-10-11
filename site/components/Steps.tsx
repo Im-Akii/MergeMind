@@ -1,50 +1,25 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import CodeBlock from "./CodeBlock";
 import PunchCard from "./PunchCard";
+import { useGuide } from "./Guide";
 import { steps } from "@/lib/content";
-import { scoutReact } from "@/lib/scout";
-
-const KEY = "mergemind-setup-done";
-
-export function readDone(): string[] {
-  try {
-    return JSON.parse(window.localStorage.getItem(KEY) || "[]");
-  } catch {
-    return [];
-  }
-}
 
 export default function Steps() {
-  const [done, setDone] = useState<string[]>([]);
-
-  useEffect(() => setDone(readDone()), []);
-
-  const toggle = (id: string) => {
-    const next = done.includes(id) ? done.filter((d) => d !== id) : [...done, id];
-    setDone(next);
-    try {
-      window.localStorage.setItem(KEY, JSON.stringify(next));
-    } catch {
-      /* private window: progress just isn't remembered */
-    }
-    window.dispatchEvent(new CustomEvent("setup:progress", { detail: next.length }));
-    if (next.length > done.length) scoutReact(next.length === steps.length ? "sparkle" : "heart", 1200);
-  };
+  const { done, toggle, current } = useGuide();
 
   return (
     <ol className="steps">
       {steps.map((s, i) => {
         const isDone = done.includes(s.id);
         return (
-          <li key={s.id} id={`step-${s.id}`} className={`step${isDone ? " done" : ""}`}>
+          <li key={s.id} id={`step-${s.id}`} className={`step${isDone ? " done" : ""}${current === i ? " current" : ""}`}>
             <span className="step-no" aria-hidden="true">
               {String(i + 1).padStart(2, "0")}
             </span>
             <div className="step-body">
               <div className="step-title">
-                <h3>
+                <h3 tabIndex={-1}>
                   <span className="sr-only">Step {i + 1}: </span>
                   {s.title}
                 </h3>

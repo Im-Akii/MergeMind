@@ -113,9 +113,14 @@ export default function Hero() {
           </div>
           <div className="unit-body rivets">
             <Mascot size={200} />
-            <p className="bubble">
-              I follow your cursor. Poke me if you like. Poke me four times and see what happens.
-            </p>
+            <div className="bubble hello">
+              <p>
+                Hi, I&apos;m Scout. I&apos;ll walk you through setting me up on your repository, one step at a time.
+              </p>
+              <a className="speech-btn" href="#setup">
+                Walk me through it <span aria-hidden="true">→</span>
+              </a>
+            </div>
           </div>
           <pre className="readout" aria-label="Example preflight output">
             <span className="prompt">$ mergemind preflight --repo you/your-repo</span>
