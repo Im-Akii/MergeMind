@@ -61,7 +61,8 @@ flowchart LR
 
 | Tool | Role in MergeMind |
 |---|---|
-| **NVIDIA Nemotron** | Super with reasoning for the investigation, Lightning for fast checks: the leak critic and answers |
+| **NVIDIA Nemotron 3 Super 120B** (reasoning on) | the investigator agent: read-only tools, an evidence ledger, one repair round |
+| **NVIDIA Nemotron 3.5 Lightning 30B** | fast checks: duplicate adjudication, verifier critic, PR criteria check, leak critic, answers to contributors |
 | **Entire** | entire-graph is the code-intelligence backend (search, definitions, impact: callers, tests, co-change), fused with a git-grep backend |
 | **neatlogs** | One session per issue, with workflow, agent, tool and guardrail spans; versioned prompts; tagged backtest runs. Credentials are masked before export |
 | **cfo.ai** | Unit economics and the business plan, from measured tokens per triage |
@@ -83,8 +84,73 @@ difference. Full table: [evidence/eval/v1-vs-v2.md](evidence/eval/v1-vs-v2.md).
 | Full Nemotron triage, 18-issue sample: real bugs accepted | 9/18 | 9/18 (no measurable change) |
 | Leak corpus: secrets or restricted content leaked | 0 | **0** |
 
-Across all 438 pull requests, false-alarm holds dropped from 25% to 8%, and out-of-scope fixes from 61% to 45%. A full
-triage costs about **$0.007** in LLM calls at hosted Nemotron list prices, and $0 on the free NVIDIA endpoint.
+Across all 438 pull requests, false-alarm holds dropped from 25% to 8%, and out-of-scope fixes from 61% to 45%.
+
+## Business plan (cfo.ai)
+
+**Live model: <https://cfo.ai/s/PG56dy5YWbPcGD_b>**. It covers 24 months with Base, Growth and Downside scenarios,
+on three pages: Assumptions, Growth & accounts, and P&L & cash.
+
+**Cost per unit (measured, v2 backtest):**
+
+| Unit | Median | p90 |
+|---|---|---|
+| Triage of one issue (investigator + verifier + duplicates + leak guard) | $0.0069 | $0.0108 |
+| One PR review | $0.0005 | $0.0007 |
+| **All-in LLM cost per issue** (triage + 50% accepted × 2 PR reviews) | **$0.0074** | **$0.0115** |
+
+That's about 55k tokens per triaged issue (median), at hosted Nemotron list prices. On the free NVIDIA endpoint it
+costs **$0**.
+
+**Pricing tiers** (prices are our assumptions; costs use the p90 figure):
+
+| Tier | Price / month | Our cost / month | Gross margin | Cost if AI prices double |
+|---|---|---|---|---|
+| **Free**: self-hosted GitHub Action, your own NVIDIA key | $0 | $0 | — | $0 |
+| **Pro**: hosted, per repository (~80 issues/month) | $19 | $1.42 | **93%** | $2.34 |
+| **Team**: hosted, up to 10 private repositories | $149 | $14.21 | **90%** | $23.43 |
+
+**Scenarios:**
+
+| Scenario | Stops burning cash | Month-24 revenue | Gross margin |
+|---|---|---|---|
+| Base: 200 new free repos/month, 2% convert, 3% churn | month 4 | $32.2k/month | 91% |
+| Growth: 600, 3%, 2% | month 2 | $167.3k/month | 91% |
+| Downside: 80, 1%, 5%, AI prices ×2 | month 7 | $4.9k/month | 85% |
+
+**What the model shows:**
+- **The free tier costs us nothing.** Maintainers run the Action with their own free NVIDIA key, so free users
+  become a funnel for paid tiers rather than a cost.
+- **Model price is a small risk.** Doubling AI prices costs about 6 margin points; growth and conversion matter far
+  more.
+- **Break-even depends on team cost.** With a real team cost, for example one engineer at about $15k a month, Base
+  breaks even around month 15.
+
+Only the AI cost per issue is measured. Prices, growth, conversion and churn are estimates, and team cost and
+starting cash are demo placeholders. Drivers, formulas and the entry sheet: [evidence/cfo/](evidence/cfo/cfo_entry_sheet.md).
+
+## How it's built
+
+- **A pure state machine.** `transition(state, event) -> (state, effects)` is plain logic with no I/O, so every
+  decision is testable.
+- **Effects are idempotent**, so retrying one never posts twice. Timers are durable: check-ins, access expiry and
+  CI timeouts.
+- **Runtime.** On GitHub Actions, each event triggers one engine pass, and SQLite state is kept on an orphan
+  `mergemind-state` branch. On a laptop, `mergemind run` does the same in a loop.
+- **Stack:** Python 3.12, SQLite, httpx and Typer.
+
+**Failure recovery**, exercised live and by tests (details: [evidence/recovery.md](evidence/recovery.md)):
+
+| Failure | Recovery |
+|---|---|
+| GitHub 500 / 429 | backoff and retry; a rate-limited merge waits for the reset time |
+| GitHub 403 on a write | permission-blocked: maintainers are told, and it doesn't retry |
+| Nemotron 429 | backoff and retry |
+| Malformed tool-call JSON | the error goes back to the model, which repairs its call |
+| entire-graph timeout | git-grep fallback |
+| Leak critic unavailable | fails closed: the message is held for a maintainer |
+| Push or base change after approval | approval voided or carried over only if nothing else changed, then re-verified |
+| `main` CI red after a merge | revert pull request opened and maintainers told |
 
 ## Safety model
 
