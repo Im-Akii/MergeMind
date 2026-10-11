@@ -69,14 +69,16 @@ def issue_events(issue: dict[str, Any], repo: str, known: bool) -> list[Event]:
 
 
 def comment_events(gh: GitHub, repo: str, number: int, comment: dict[str, Any]) -> list[Event]:
-    if is_bot(comment.get("user")):
+    body = comment.get("body") or ""
+    # MergeMind may post with a user token: its own comments carry the hidden marker
+    if is_bot(comment.get("user")) or "<!-- mergemind:" in body:
         return []
     author = comment["user"]["login"]
     base = {"author": author, "comment_id": comment["id"]}
-    cmds = parse_commands(comment.get("body") or "")
+    cmds = parse_commands(body)
     if not cmds:
         return [Event(repo=repo, number=number, source="poll", kind="comment",
-                      external_id=f"comment:{comment['id']}", payload=base)]
+                      external_id=f"comment:{comment['id']}", payload={**base, "body": body[:2000]})]
     writer = can_write(gh, repo, comment)
     return [
         Event(repo=repo, number=number, source="command", kind="command",

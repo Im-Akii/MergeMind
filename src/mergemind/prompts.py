@@ -21,7 +21,7 @@ _cache: dict[str, tuple[str, str]] = {}
 
 def registry() -> dict[str, str]:
     """name -> local default text, for every prompt MergeMind sends."""
-    from mergemind.agents import investigator, verifier
+    from mergemind.agents import answer, investigator, verifier
     from mergemind.guard import leak
     from mergemind.pr import review
     from mergemind.retrieval import dupes
@@ -32,6 +32,7 @@ def registry() -> dict[str, str]:
         "dup_adjudicator": dupes.ADJ_SYSTEM,
         "pr_reviewer": review.SYSTEM,
         "leak_critic": leak.CRITIC_SYSTEM,
+        "answerer": answer.SYSTEM,
     }
 
 

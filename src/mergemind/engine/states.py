@@ -7,6 +7,7 @@ and arrive inside the event payload.
 
 from __future__ import annotations
 
+from mergemind.agents.answer import MAX_ANSWERS_PER_ISSUE, looks_like_question
 from mergemind.config import Policy
 from mergemind.models import TERMINAL, Effect, Event, IssueState, Phase
 
@@ -27,6 +28,11 @@ DISPOSITION_PHASE = {
 TRIAGE_REENTRY = {P.NEW, P.NEEDS_INFO, P.DUPLICATE_SUGGESTED, P.ESCALATED}
 ACCESS_PHASES = {P.ACCESS_GRANTED, P.WORKING}
 PR_PHASES = {P.PR_ANALYSING, P.CHANGES_REQUESTED, P.SAFETY_HOLD, P.READY_FOR_MAINTAINER, P.MERGING}
+# phases with a triage report MergeMind can answer questions from (never security reports,
+# and not NEEDS_INFO, where the author's reply re-runs triage instead)
+QA_PHASES = {P.ACCESS_OFFERED, P.ACCEPTED_UNCLAIMED, P.AWAITING_APPROVAL, P.ESCALATED, P.FEATURE_REVIEW,
+             P.QUESTION, P.ACCESS_GRANTED, P.WORKING, P.PR_ANALYSING, P.CHANGES_REQUESTED, P.SAFETY_HOLD,
+             P.READY_FOR_MAINTAINER}
 
 AUTONOMY_ORDER = ["observe", "suggest", "invite", "merge"]
 
@@ -52,6 +58,27 @@ def transition(
     autonomy: str | None = None,
 ) -> tuple[IssueState, list[Effect]]:
     """Return the next state and the effects to run. Never mutates `state`."""
+    s, effects = _transition(state, evt, policy, now, autonomy)
+    # a question from the issue author or the contributor gets an answer (through the leak guard)
+    p = evt.payload
+    who = (p.get("author") or "").lower()
+    if (evt.kind == "comment" and state.phase in QA_PHASES and not s.data.get("stopped")
+            and who and who in {(state.author or "").lower(), (state.contributor or "").lower()}
+            and looks_like_question(p.get("body") or "")
+            and s.data.get("answers", 0) < MAX_ANSWERS_PER_ISSUE):
+        s = s.model_copy(update={"data": {**s.data, "answers": s.data.get("answers", 0) + 1}})
+        effects = [*effects, Effect(kind="answer_question", payload={
+            "comment_id": p.get("comment_id"), "author": p.get("author"), "body": p.get("body", "")})]
+    return s, effects
+
+
+def _transition(
+    state: IssueState,
+    evt: Event,
+    policy: Policy,
+    now: float,
+    autonomy: str | None = None,
+) -> tuple[IssueState, list[Effect]]:
     kind, p = evt.kind, evt.payload
     autonomy = autonomy or policy.autonomy
 
@@ -357,7 +384,9 @@ def _command(
     if not can_write:
         return deny("write permission required")
 
-    if name == "accept" and ph == P.FEATURE_REVIEW:
+    # a maintainer can accept what triage handed to a human (feature, escalation, missing info)
+    if name == "accept" and ph in (P.FEATURE_REVIEW, P.ESCALATED, P.NEEDS_INFO, P.QUESTION,
+                                   P.DUPLICATE_SUGGESTED, P.OUT_OF_SCOPE_SUGGESTED):
         s, effects = _after_accept(_go(state, P.ACCEPTED, disposition="accept"), policy, autonomy)
         return s, [_card(s), *effects]
 

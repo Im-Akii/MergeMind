@@ -83,4 +83,5 @@ def test_prompt_registry_falls_back_to_local():
 
     text, version = prompts.get("investigator_test_only", "LOCAL TEXT")
     assert text == "LOCAL TEXT" and version.startswith("local-")
-    assert set(prompts.registry()) == {"investigator", "critic", "dup_adjudicator", "pr_reviewer", "leak_critic"}
+    assert set(prompts.registry()) == {"investigator", "critic", "dup_adjudicator", "pr_reviewer", "leak_critic",
+                                       "answerer"}

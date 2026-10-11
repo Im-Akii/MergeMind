@@ -257,6 +257,25 @@ def post_comment(ctx: Context, state: IssueState, eff: Effect) -> list[Event]:
     return []
 
 
+@handler("answer_question")
+def answer_question(ctx: Context, state: IssueState, eff: Effect) -> list[Event]:
+    """Answer the author's / contributor's question from the triage findings. The answer is
+    model-written, so it always goes through the leak guard with the critic."""
+    from mergemind.agents.answer import answer
+
+    report = _report(ctx, state)
+    if ctx.llm is None or report is None or _marker_exists(ctx, state, eff.key(state)):
+        return []
+    to = eff.payload.get("author") or ""
+    text, _usage = answer(ctx.llm, report, eff.payload.get("body") or "", list(state.data.get("scope_files") or []))
+    if not text:
+        return []
+    body = escape_mentions(text)
+    guarded = _guarded(ctx, state, f"`{to}`: {body}" if to else body, "answer", use_critic=True)
+    _post_once(ctx, state, eff, guarded or HELD_NOTE)
+    return []
+
+
 def _post_once(ctx: Context, state: IssueState, eff: Effect, text: str) -> None:
     key = eff.key(state)
     if not _marker_exists(ctx, state, key):
