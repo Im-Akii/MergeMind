@@ -25,6 +25,8 @@ flowchart LR
 | **Results** | [evidence/](evidence/README.md): 450-issue backtest, 438 PRs, leak corpus, recovery runs |
 | **Business model** | [cfo.ai plan](https://cfo.ai/s/PG56dy5YWbPcGD_b), built from measured token costs |
 | **Hackathon write-up** | [hackathon.md](hackathon.md) |
+| **Evidence for judges** | [neatlogs traces](evidence/neatlogs/README.md) · [Entire output and checkpoints](evidence/entire/README.md) · [cfo.ai screenshots](evidence/cfo/screenshots/) · [live run](evidence/live/) · [checklist](hackathon.md#evidence-for-judges) |
+| **Building in public** | [#neatHack post on X](https://x.com/AkshayRsnrp/status/2109294188894490624) |
 
 ---
 

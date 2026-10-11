@@ -1,0 +1,36 @@
+● 01M4NRA89ERPYH7BHCV5D2XKBQ  "what's the status of the backtest?"
+  10-11 20:41 (7ff59b1) README: cfo.ai business plan (unit costs, tiers, scenarios), models, architec...
+
+● 01M4NR2YYWCQSDB1WPRQ9Y1KPE  "what's the status of the backtest?"
+  10-11 20:37 (a2a8939) site: say contributor instead of reporter
+
+● 01M4NQZ5K43WW3Z24SNXJSNA4R  "what's the status of the backtest?"
+  10-11 20:35 (a8bfe97) Rewrite the README; setup guide as Markdown (SETUP_GUIDE.md) with all command...
+
+● 01M4NM9SCB24MT5X9SVXVJB9TW  "what's the status of the backtest?"
+  10-11 19:31 (65239b3) Leak guard: judge GitHub link paths per segment; critic ignores MergeMind's o...
+
+● 01M4NCZSPRMGENS7BDD0QE7EHV  "what's the status of the backtest?"
+  10-11 17:23 (6596a04) Never export credentials in traces: global neatlogs mask, settings hide secre...
+
+● 01M4N33W3296971KPK3WAZ7W3F  "what's the status of the backtest?"
+  10-11 14:31 (f6149f9) Add SETUP_GUIDE.txt: set up MergeMind on your own repository
+
+● 01M4N2D7GV5NWSKFSD4KMCJVDY  "what's the status of the backtest?"
+  10-11 14:18 (fed4ce4) Treat requests phrased as statements as questions (e.g. 'I need X, please pas...
+
+● 01M4MR0YFFYCHVWVQFR5TAVTRD  "what's the status of the backtest?"
+  10-11 11:17 (9e25908) Answer contributor questions through the leak guard; maintainers can accept e...
+
+● 01M4KFY9Z27ME9BF4VBB0F6Y8S  "what's the status of the backtest?"
+  10-10 23:36 (d4b277d) Fix runtime workflow template: runner context only in step env; let scheduled...
+
+● 01M4KD9B4PAT759VMYQTF23X8M  "what's the status of the backtest?"
+  10-10 22:50 (d9f001c) Keep testing notes and ignore rules local (.git/info/exclude)
+
+● 01M4KCZSC8AD3W4HNJ1HJ99VQ8  "what's the status of the backtest?"
+  10-10 22:45 (17fa69f) Stop tracking local AI-assistant and Entire dev config (gitignored)
+
+● 01M4KBZKJGASAC9N2TXQPVYQG3  "what's the status of the backtest?"
+  10-10 22:27 (2b1e48c) Link the cfo.ai business model (Base/Growth/Downside) from hackathon.md and t...
+

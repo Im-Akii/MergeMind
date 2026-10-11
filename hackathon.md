@@ -121,12 +121,25 @@ uv run mergemind locate https://github.com/pallets/click/issues/3362        # no
 uv run mergemind triage https://github.com/pallets/click/issues/3362        # full triage, never writes
 uv run mergemind sandbox-kit ../mergemind-sandbox -m <your-github-user>     # end-to-end sandbox
 uv run mergemind actions-kit .                                              # always-on via GitHub Actions
-uv run pytest -q                                                            # 160 tests, scenarios S1–S16
+uv run pytest -q                                                            # 171 tests, scenarios S1–S16
 ```
 
 The keys go in `.env.local` (`NVIDIA_API_KEY`, `GITHUB_TOKEN`, optional `NEATLOGS_API_KEY`). For the end-to-end
 run, `sandbox-kit` writes a `KIT_STEPS.md` guide into the sandbox it creates; the full design is in
 [buildplan-v2.md](buildplan-v2.md).
+
+## Evidence for judges
+
+| Checklist item | Where to check it |
+|---|---|
+| The agent improved (before and after runs, with numbers) | [evidence/eval/v1-vs-v2.md](evidence/eval/v1-vs-v2.md): runs tagged `eval:v1` and `eval:v2` in neatlogs |
+| You used neatlogs | [evidence/neatlogs/](evidence/neatlogs/README.md): dashboard, sessions per issue, a full triage trace |
+| You used Entire | [evidence/entire/](evidence/entire/README.md): entire-graph ranked a live bug's function #1, impact output, 12 checkpoints |
+| You used cfo.ai | [live model](https://cfo.ai/s/PG56dy5YWbPcGD_b), [screenshots](evidence/cfo/screenshots/), [entry sheet](evidence/cfo/cfo_entry_sheet.md) |
+| The agent recovers from failures | [evidence/recovery.md](evidence/recovery.md): 4 faults injected in one live run |
+| You built in public | [#neatHack post on X](https://x.com/AkshayRsnrp/status/2109294188894490624) |
+| You wrote the code during the hackathon | [commit history](https://github.com/Im-Akii/MergeMind/commits/main): first commit Oct 10, 2026 |
+| It runs live | [akii-codes/mergemind-tests-2.0](https://github.com/akii-codes/mergemind-tests-2.0): [issue #1](https://github.com/akii-codes/mergemind-tests-2.0/issues/1) → [PR #2](https://github.com/akii-codes/mergemind-tests-2.0/pull/2), screenshots in [evidence/live/](evidence/live/) |
 
 ## Honest limits
 

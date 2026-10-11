@@ -16,6 +16,10 @@ month, and scored against the merged PR that fixed it. Headline numbers are on t
 | Failure recovery (live fault injection + scenario tests) | [recovery.md](recovery.md), log [eval/faults-v1.log](eval/faults-v1.log) | neatlogs (`eval:faults`) |
 | Leak guard corpus | `uv run mergemind eval-leak --critic` (0 leaks, 0 false redactions); also in [eval/v1-vs-v2.md](eval/v1-vs-v2.md) | Nemotron Lightning |
 | Unit economics → cfo.ai (v2 measurements) | [cfo/unit_economics.md](cfo/unit_economics.md), [cfo/cfo_drivers.csv](cfo/cfo_drivers.csv), entry sheet [cfo/cfo_entry_sheet.md](cfo/cfo_entry_sheet.md), **live model https://cfo.ai/s/PG56dy5YWbPcGD_b** | cfo.ai |
+| **neatlogs screenshots**: dashboard, sessions per issue, a full triage trace with `[REDACTED]` keys | [neatlogs/](neatlogs/README.md) | neatlogs |
+| **entire-graph output**: it ranked the function behind a live bug #1; impact analysis; Entire checkpoints | [entire/](entire/README.md) | Entire |
+| **cfo.ai model screenshots**: assumptions, growth & accounts, P&L & cash | [cfo/screenshots/](cfo/screenshots/) | cfo.ai |
+| **Live run on GitHub Actions**: issue → triage → `/contribute` → fork PR → verification → maintainer merge | [live/](live/), or open [akii-codes/mergemind-tests-2.0#1](https://github.com/akii-codes/mergemind-tests-2.0/issues/1) | GitHub Actions |
 
 ## neatlogs
 

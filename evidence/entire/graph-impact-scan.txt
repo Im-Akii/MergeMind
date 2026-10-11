@@ -1,0 +1,32 @@
+Index: cache-miss (4160ms) | Query: 2ms | Total: 4163ms
+Completeness: no parse failures in Python (83 files parsed); 2 elsewhere (JSON 1, SQL 1) cannot affect this answer — see --format json.
+Impact: SecretScanner.scan (src/mergemind/guard/secrets.py:119) def=119 span=119-164 [method in SecretScanner]
+Blast radius: 6 callers (6 direct, 0 transitive), 5 callees, 2 type consumers, 2 data flows, 3 co-change files, 4 siblings.
+Callers (6 direct, 0 transitive; who breaks if behavior changes):
+- SecretScanner.redact (src/mergemind/guard/secrets.py:167, def :166)
+- scan (src/mergemind/pr/safety.py:111) [+1 more call site]
+- test_git_shas_are_not_secrets (tests/test_leak_guard.py:53, def :51)
+- test_scanner_learns_known_values_and_leak_guard_still_scans_url_paths (tests/test_v2_precision.py:78, def :76) [+1 more call site]
+- test_identifier_rule_does_not_hide_random_tokens (tests/test_v2_precision.py:231, def :224) [+3 more call sites]
+- test_github_links_with_uppercase_owner_are_not_secrets (tests/test_v2_precision.py:247, def :239) [+1 more call site]
+Callees (5; what it depends on):
+- urllib.parse.unquote
+- SecretHit (src/mergemind/guard/secrets.py:56) [CONSTRUCTS]
+- _looks_random (src/mergemind/guard/secrets.py:68)
+- _code_value (src/mergemind/guard/secrets.py:89)
+- _merge (src/mergemind/guard/secrets.py:173)
+Type consumers (0 in, 2 out; USES_TYPE/PARAM_TYPE/RETURNS_TYPE):
+- -> SecretHit (src/mergemind/guard/secrets.py:56) [RETURNS_TYPE]
+- -> SecretHit (src/mergemind/guard/secrets.py:56) [USES_TYPE]
+Data flows (2 in, 0 out):
+- <- SecretScanner.redact (src/mergemind/guard/secrets.py:166)
+- <- _merge (src/mergemind/guard/secrets.py:173)
+Co-change coupling (3; files that historically change with src/mergemind/guard/secrets.py):
+- src/mergemind/cli.py [files changed together in 2 recent commits]
+- src/mergemind/guard/leak.py [files changed together in 2 recent commits]
+- tests/test_v2_precision.py [files changed together in 2 recent commits]
+Same-container siblings (4):
+- SecretScanner.__init__ (src/mergemind/guard/secrets.py:100)
+- SecretScanner.from_environment (src/mergemind/guard/secrets.py:104)
+- SecretScanner.learn_file (src/mergemind/guard/secrets.py:108)
+- SecretScanner.redact (src/mergemind/guard/secrets.py:166)
