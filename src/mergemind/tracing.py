@@ -11,6 +11,7 @@ helper is a no-op, so tracing can never take the agent down.
 from __future__ import annotations
 
 import contextlib
+import re
 import functools
 import logging
 from typing import Any, Callable, Iterator, TypeVar
@@ -22,6 +23,48 @@ _enabled = False
 _tags: list[str] = []
 
 
+_SECRET_KEY = re.compile(r"(?i)(api[_\s-]?key|token|secret|passw(or)?d|credential|private[_\s-]?key|"
+                         r"authorization|app[_\s-]?key)")
+_ID_KEY = re.compile(r"(?i)(^|_)(trace|span|parent|session|run)_?id$")
+_scanner_cache: list[Any] = []
+
+
+def _scanner() -> Any:
+    if not _scanner_cache:
+        from mergemind.guard.secrets import SecretScanner
+
+        _scanner_cache.append(SecretScanner.from_environment())
+    return _scanner_cache[0]
+
+
+def _redact_text(text: str) -> str:
+    # exact detectors only: every secret value in the environment, provider token formats, private keys
+    for h in sorted(_scanner().scan(text, heuristics=False), key=lambda h: -h.start):
+        text = text[: h.start] + "[REDACTED]" + text[h.end:]
+    return text
+
+
+def _scrub(value: Any, key: str = "") -> Any:
+    if isinstance(value, dict):
+        return {k: _scrub(v, str(k)) for k, v in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [_scrub(v, key) for v in value]
+    if isinstance(value, str):
+        if key and not _ID_KEY.search(key) and _SECRET_KEY.search(key) and value:
+            return "[REDACTED]"
+        return _redact_text(value)
+    return value
+
+
+def mask(span_dict: dict[str, Any]) -> dict[str, Any]:
+    """Applied by neatlogs to every span before export. Function inputs and outputs can contain
+    objects that hold credentials (settings, clients); nothing secret may leave the machine."""
+    try:
+        return _scrub(span_dict)
+    except Exception:  # never export an unscrubbed span
+        return None  # type: ignore[return-value]
+
+
 def init(api_key: str | None, workflow_name: str = "mergemind", tags: list[str] | None = None) -> bool:
     global _enabled, _tags
     if not api_key:
@@ -30,7 +73,7 @@ def init(api_key: str | None, workflow_name: str = "mergemind", tags: list[str] 
         import neatlogs
 
         _tags = list(tags or [])
-        neatlogs.init(api_key=api_key, workflow_name=workflow_name, tags=_tags or None)
+        neatlogs.init(api_key=api_key, workflow_name=workflow_name, tags=_tags or None, mask=mask)
         _enabled = True
     except Exception as exc:  # tracing must never take the agent down
         log_.warning("neatlogs init failed: %s", exc)

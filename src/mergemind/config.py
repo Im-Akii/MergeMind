@@ -9,7 +9,7 @@ from typing import Literal
 
 import yaml
 from dotenv import load_dotenv
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_serializer, field_validator
 
 Autonomy = Literal["observe", "suggest", "invite", "merge"]
 
@@ -34,21 +34,26 @@ def parse_percent(value: str | float) -> float:
 
 
 class Settings(BaseModel):
-    nvidia_api_key: str | None = None
+    # credentials never appear in repr() or serialized output (logs, traces, errors)
+    nvidia_api_key: str | None = Field(default=None, repr=False)
     llm_base_url: str = "https://integrate.api.nvidia.com/v1"
     llm_model_investigator: str = "nvidia/nemotron-3-super-120b-a12b"
     llm_model_fast: str = "nvidia/nemotron-3.5-lightning-30b-a3b"
     llm_rpm: int = 30
-    neatlogs_api_key: str | None = None
-    github_token: str | None = None
+    neatlogs_api_key: str | None = Field(default=None, repr=False)
+    github_token: str | None = Field(default=None, repr=False)
     gh_app_id: str | None = None
-    gh_app_key: str | None = None
+    gh_app_key: str | None = Field(default=None, repr=False)
     db_path: Path = Path("mergemind.db")
     work_dir: Path = Path(".mergemind")
     autonomy_override: Autonomy | None = None
     faults: str = ""
     poll_interval_s: float = 15.0
     eval_run_id: str | None = None  # tags traces and runs, e.g. v1
+
+    @field_serializer("nvidia_api_key", "neatlogs_api_key", "github_token", "gh_app_key")
+    def _hide_secret(self, value: str | None) -> str | None:
+        return "[REDACTED]" if value else None
 
     @classmethod
     def from_env(cls) -> "Settings":

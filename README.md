@@ -36,7 +36,11 @@ Full table: [evidence/eval/v1-vs-v2.md](evidence/eval/v1-vs-v2.md).
 All 438 PRs: false-alarm holds 25% → 8%, out-of-scope 61% → 45%. LLM cost of a full triage is ~$0.007 per issue at hosted Nemotron list prices ($0 on the free NVIDIA endpoint);
 see [evidence/cfo/](evidence/cfo/unit_economics.md) and the live cfo.ai business model (https://cfo.ai/s/PG56dy5YWbPcGD_b). Everything else: [evidence/](evidence/README.md).
 
-## Setup
+## Use MergeMind on your own repository
+
+Step-by-step guide (about 20 minutes, runs free on GitHub Actions): **[SETUP_GUIDE.txt](SETUP_GUIDE.txt)**.
+
+## Setup (development)
 
 ```bash
 uv sync
