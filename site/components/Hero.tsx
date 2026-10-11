@@ -72,7 +72,7 @@ export default function Hero() {
             </span>
           </h1>
           <p className="lede">
-            MergeMind is a GitHub agent. It investigates new issues in your code, gives the reporter time-limited access
+            MergeMind is a GitHub agent. It investigates new issues in your code, gives the contributor time-limited access
             and a briefing, checks their pull request, and merges it when a maintainer says yes. Nothing it posts can
             leak a secret.
           </p>

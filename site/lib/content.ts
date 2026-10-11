@@ -15,9 +15,9 @@ export const stations = [
   {
     id: "access",
     name: "Access",
-    actor: "Reporter",
+    actor: "Contributor",
     body:
-      "On an accepted bug the reporter comments /contribute. They get push access for 14 days, or work from a fork, plus a briefing: where the bug is, what's in scope, what done means.",
+      "On an accepted bug the contributor comments /contribute. They get push access for 14 days, or work from a fork, plus a briefing: where the bug is, what's in scope, what done means.",
   },
   {
     id: "check",
@@ -44,10 +44,10 @@ export const stations = [
 
 export const parts = [
   { item: "A GitHub repository you administer", why: "MergeMind works on its issues and pull requests. Public repos get Actions minutes for free.", need: "required" },
-  { item: "A fine-grained GitHub token", why: "Posts comments, invites the reporter, merges. Scoped to that one repository.", need: "required" },
+  { item: "A fine-grained GitHub token", why: "Posts comments, invites the contributor, merges. Scoped to that one repository.", need: "required" },
   { item: "An NVIDIA API key", why: "From build.nvidia.com. Nemotron models do the triage, the PR criteria check and the leak critic. The free endpoint costs $0.", need: "required" },
   { item: "Python 3.12 and uv (or pip)", why: "To run preflight, actions-kit and laptop mode on your machine.", need: "required" },
-  { item: "A second GitHub account", why: "Plays the reporter while you test, so you can see both sides.", need: "for testing" },
+  { item: "A second GitHub account", why: "Plays the contributor while you test, so you can see both sides.", need: "for testing" },
   { item: "Entire CLI with the graph plugin", why: "Better code search and impact analysis. Without it MergeMind uses git grep.", need: "optional" },
   { item: "A neatlogs API key", why: "One trace per issue and pull request. Tracing is off without it.", need: "optional" },
 ] as const;
@@ -194,7 +194,7 @@ export const steps: Step[] = [
   },
   {
     id: "test",
-    tip: "Open the sample issue from your second account. That account plays the reporter, so that's who I'll invite.",
+    tip: "Open the sample issue from your second account. That account plays the contributor, so that's who I'll invite.",
     title: "Test it end to end",
     lead: "The sandbox kit writes a tiny repository with a planted bug, a sample issue and two prepared fixes.",
     code: [{ label: "sandbox", text: "uv run mergemind sandbox-kit ../mergemind-sandbox -m your-username" }],
@@ -210,7 +210,7 @@ export const steps: Step[] = [
 
 export const autonomy = [
   { id: "observe", label: "Observe", body: "Writes nothing to GitHub. It only reports what it would do, so you can watch it on a real repository first.", mood: "sleepy" },
-  { id: "suggest", label: "Suggest", body: "Posts triage cards and PR verdicts. Giving a reporter access needs a maintainer's /mergemind approve-access. This is the default.", mood: "surprised" },
+  { id: "suggest", label: "Suggest", body: "Posts triage cards and PR verdicts. Giving a contributor access needs a maintainer's /mergemind approve-access. This is the default.", mood: "surprised" },
   { id: "invite", label: "Invite", body: "Grants access by itself after /contribute, and posts pull request reviews.", mood: "wink" },
   { id: "merge", label: "Merge", body: "Also merges after /mergemind approve and a fresh verification, revokes access when the work is done, and opens revert PRs when CI breaks.", mood: "delighted" },
 ] as const;
@@ -219,7 +219,7 @@ export const configKeys: { key: string; def: string; body: string }[] = [
   { key: "autonomy", def: "suggest", body: "observe, suggest, invite or merge. The MERGEMIND_AUTONOMY variable can lower it, never raise it." },
   { key: "maintainers", def: "[]", body: "GitHub usernames to ping when a decision is needed and escalate_to is empty." },
   { key: "escalate_to", def: "[]", body: "Who gets escalations: security reports, safety holds, failed merges." },
-  { key: "access.mode", def: "collaborator", body: "collaborator sends a push-access invite (needs Administration on the token). fork means the reporter forks; no invite." },
+  { key: "access.mode", def: "collaborator", body: "collaborator sends a push-access invite (needs Administration on the token). fork means the contributor forks; no invite." },
   { key: "access.permission", def: "push", body: "push or triage." },
   { key: "access.ttl", def: "14d", body: "How long access lasts. It is also revoked on merge or when the issue closes." },
   { key: "access.checkin_at", def: "50%", body: "When to check in if there's no branch or PR activity yet." },
@@ -237,7 +237,7 @@ export const configKeys: { key: string; def: string; body: string }[] = [
 ];
 
 export const commands: { cmd: string; who: string; body: string }[] = [
-  { cmd: "/contribute", who: "the reporter", body: "Ask for access to fix this issue." },
+  { cmd: "/contribute", who: "the contributor", body: "Ask for access to fix this issue." },
   { cmd: "/mergemind withdraw", who: "the contributor", body: "Give up the issue. Access is removed." },
   { cmd: "/mergemind recheck", who: "contributor or maintainer", body: "Analyse the pull request again." },
   { cmd: "/mergemind why", who: "anyone", body: "Post the reasoning behind the decision, with evidence, through the leak guard." },

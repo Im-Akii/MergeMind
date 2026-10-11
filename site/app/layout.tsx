@@ -9,7 +9,7 @@ const mono = Martian_Mono({ subsets: ["latin"], weight: ["400", "500", "600"], v
 export const metadata: Metadata = {
   title: "MergeMind Field Manual",
   description:
-    "Set up MergeMind, the GitHub agent that takes an issue from opened to merged fix with the reporter as the contributor.",
+    "Set up MergeMind, the GitHub agent that takes an issue from opened to merged fix, together with the contributor who found the bug.",
   icons: { icon: `${process.env.NEXT_PUBLIC_BASE_PATH || ""}/icon.png` },
 };
 

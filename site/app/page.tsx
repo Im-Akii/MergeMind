@@ -52,7 +52,7 @@ export default function Page() {
               <p className="eyebrow">How it works</p>
               <h2>Five stations, from issue to merge</h2>
               <p>
-                An issue rides through in order. A person makes the two decisions that matter: the reporter chooses to
+                An issue rides through in order. A person makes the two decisions that matter: the contributor chooses to
                 fix it, and a maintainer chooses to merge.
               </p>
             </div>
