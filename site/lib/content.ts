@@ -90,11 +90,13 @@ export type Step = {
   list?: string[];
   note?: string;
   perms?: boolean;
+  tip: string; // what Scout says while you're on this step
 };
 
 export const steps: Step[] = [
   {
     id: "install",
+    tip: "Finish with uv run mergemind --help. If it prints a list of commands, I'm installed.",
     title: "Install MergeMind on your machine",
     lead: "You need the CLI for preflight, for writing the workflow, and for laptop mode.",
     code: [
@@ -104,6 +106,7 @@ export const steps: Step[] = [
   },
   {
     id: "token",
+    tip: "GitHub shows the token only once, so copy it before you leave that page. Tick exactly the seven boxes on the card, nothing more.",
     title: "Create the GitHub token",
     lead: "Open github.com/settings/personal-access-tokens and choose Generate new token (fine-grained).",
     list: [
@@ -118,12 +121,14 @@ export const steps: Step[] = [
   },
   {
     id: "policy",
+    tip: "Leave autonomy on suggest for now. I'll post what I find, and I'll ask a maintainer before I give anyone access.",
     title: "Write the policy file",
     lead: "Commit .github/mergemind.yml to the default branch. Every key is optional; start on suggest and raise autonomy once you trust it.",
     code: [{ label: ".github/mergemind.yml", text: starterPolicy }],
   },
   {
     id: "workflows",
+    tip: "Both files have to land on your default branch. That's the only branch I run from.",
     title: "Add the two workflows",
     lead: "Run these from the root of a local clone of your repository, then commit and push both files to the default branch.",
     code: [
@@ -138,6 +143,7 @@ export const steps: Step[] = [
   },
   {
     id: "environment",
+    tip: "The name has to be exactly mergemind, all lowercase. That's the environment my workflow asks for.",
     title: "Create the mergemind environment",
     lead: "Settings → Environments → New environment, named mergemind.",
     list: [
@@ -152,6 +158,7 @@ export const steps: Step[] = [
   },
   {
     id: "ruleset",
+    tip: "No ruleset, no invites. I check it every time before I give someone access.",
     title: "Protect the default branch",
     lead: "Settings → Rules → Rulesets → New branch ruleset. Target the default branch.",
     list: [
@@ -165,6 +172,7 @@ export const steps: Step[] = [
   },
   {
     id: "preflight",
+    tip: "Every line should say PASS. If one says FAIL, find it under Fault codes further down; each has a fix.",
     title: "Run preflight",
     lead: "It reads your repository with the token and checks everything above. Nothing is written.",
     code: [
@@ -175,6 +183,7 @@ export const steps: Step[] = [
   },
   {
     id: "start",
+    tip: "The first run takes a minute or two while I install. After that I wake up on every issue and comment by myself.",
     title: "Start it",
     lead: "Open your repository's Actions tab, pick mergemind, and choose Run workflow once. After that it runs by itself.",
     code: [
@@ -185,6 +194,7 @@ export const steps: Step[] = [
   },
   {
     id: "test",
+    tip: "Open the sample issue from your second account. That account plays the reporter, so that's who I'll invite.",
     title: "Test it end to end",
     lead: "The sandbox kit writes a tiny repository with a planted bug, a sample issue and two prepared fixes.",
     code: [{ label: "sandbox", text: "uv run mergemind sandbox-kit ../mergemind-sandbox -m your-username" }],

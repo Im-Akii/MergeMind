@@ -19,3 +19,7 @@ export function cell(i: number): string {
 export function scoutReact(mood: Reaction | null, ms = 900): void {
   window.dispatchEvent(new CustomEvent("scout:react", { detail: { mood, ms } }));
 }
+
+export function scoutLook(dir: Direction, ms = 1400): void {
+  window.dispatchEvent(new CustomEvent("scout:look", { detail: { dir, ms } }));
+}

@@ -22,6 +22,8 @@ export default function Mascot({ size = 140, label = "Scout the robot" }: { size
   const body = useRef<HTMLSpanElement>(null);
   const timers = useRef<number[]>([]);
   const pokes = useRef({ count: 0, at: 0 });
+  const lookUntil = useRef(0);
+  const reaim = useRef<() => void>(() => {});
   const [dir, setDir] = useState<Direction>("center");
   const [mood, setMood] = useState<Reaction | null>(null);
 
@@ -40,7 +42,7 @@ export default function Mascot({ size = 140, label = "Scout the robot" }: { size
     let asleep = false;
     const aim = () => {
       const el = btn.current;
-      if (!el || !pt) return;
+      if (!el || !pt || Date.now() < lookUntil.current) return;
       const r = el.getBoundingClientRect();
       const dx = pt.x - (r.left + r.width / 2);
       const dy = pt.y - (r.top + r.height / 2);
@@ -70,6 +72,10 @@ export default function Mascot({ size = 140, label = "Scout the robot" }: { size
       aim();
       nap();
     };
+    reaim.current = () => {
+      idx = -1;
+      aim();
+    };
     window.addEventListener("pointermove", move, { passive: true });
     window.addEventListener("scroll", aim, { passive: true });
     nap();
@@ -77,6 +83,27 @@ export default function Mascot({ size = 140, label = "Scout the robot" }: { size
       window.removeEventListener("pointermove", move);
       window.removeEventListener("scroll", aim);
       window.clearTimeout(idle);
+    };
+  }, []);
+
+  // glances requested by the rest of the page, e.g. at the step being read
+  useEffect(() => {
+    let t = 0;
+    const on = (e: Event) => {
+      const { dir: d, ms } = (e as CustomEvent<{ dir: Direction; ms: number }>).detail;
+      window.clearTimeout(t);
+      lookUntil.current = Date.now() + ms;
+      setDir(d);
+      t = window.setTimeout(() => {
+        lookUntil.current = 0;
+        setDir("center");
+        reaim.current();
+      }, ms);
+    };
+    window.addEventListener("scout:look", on);
+    return () => {
+      window.removeEventListener("scout:look", on);
+      window.clearTimeout(t);
     };
   }, []);
 
