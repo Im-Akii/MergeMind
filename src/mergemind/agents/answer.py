@@ -34,9 +34,14 @@ _ASKS = re.compile(r"(?i)^\s*(please|pls|can|could|would|how|what|why|where|whic
                    r"should|need|i need|give|show|send|paste|share|tell|explain|help)\b")
 
 
+# requests are often phrased as statements: "To reproduce I need the password, please paste it."
+_REQUEST = re.compile(r"(?i)\b(please|pls|can you|could you|would you|i need|need the|need a|paste|share|"
+                      r"send me|give me|tell me|show me|explain|help me|how do|how to|where is|what is)\b")
+
+
 def looks_like_question(text: str) -> bool:
     text = (text or "").strip()
-    return bool(text) and ("?" in text or bool(_ASKS.match(text)))
+    return bool(text) and ("?" in text or bool(_ASKS.match(text)) or bool(_REQUEST.search(text)))
 
 
 def answer(llm: LLM, report: TriageReport, question: str, scope_files: list[str]) -> tuple[str, Usage]:
