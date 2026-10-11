@@ -142,10 +142,20 @@ class SecretScanner:
                     hits.append(SecretHit(kind, m.start(), m.end()))
         if heuristics:
             # in code diffs URL paths carry commit and package hashes (the leak guard keeps scanning them)
-            masked = _URL.sub(lambda m: " " * len(m.group()), text) if code else text
+            masked = _URL.sub(lambda m: " " * len(m.group()), text)
             for m in _TOKENISH.finditer(masked):
                 if _looks_random(m.group(), code):
                     hits.append(SecretHit("high_entropy", m.start(), m.end()))
+            if not code:
+                # outbound messages: judge each URL path segment on its own, so
+                # `Owner/repo/blob/<sha>/src/file` isn't one long "random" token
+                for u in _URL.finditer(text):
+                    pos = u.start()
+                    for part in u.group().split("/"):
+                        for m in _TOKENISH.finditer(part):
+                            if _looks_random(m.group(), code):
+                                hits.append(SecretHit("high_entropy", pos + m.start(), pos + m.end()))
+                        pos += len(part) + 1
         for val in self.known:
             start = text.find(val)
             while start != -1:

@@ -41,7 +41,10 @@ CRITIC_SYSTEM = """You review a message that an automated assistant is about to 
 who is fixing one specific GitHub issue. Flag the message only if it reveals something the contributor
 does not need for THAT issue, such as: secrets or credentials, contents of configuration/deployment files,
 security weaknesses, internal or private discussion, personal data about other people, or code and details
-from unrelated parts of the system. Code, file names and explanations about the issue's own area are fine."""
+from unrelated parts of the system. Code, file names and explanations about the issue's own area are fine.
+MergeMind's own process text is always fine and never a reason to flag: the access deadline, how to fork,
+branch and open a pull request, how checks, maintainer approval and merging work, how to withdraw, test
+commands, and lists of files in the issue's scope."""
 
 
 class CriticResult(BaseModel):

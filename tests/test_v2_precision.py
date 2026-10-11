@@ -234,3 +234,17 @@ def test_identifier_rule_does_not_hide_random_tokens():
     # outbound messages keep the strict rule: an identifier-looking token is still redacted there
     assert SecretScanner().scan("PytestRemovedIn10Warning")
     assert not SecretScanner().scan("X = PytestRemovedIn10Warning", code=True)
+
+
+def test_github_links_with_uppercase_owner_are_not_secrets():
+    # campus-evac#2: the briefing's blob links were held as "high_entropy" because the whole
+    # `Owner/repo/blob/<sha>/path` path was judged as one token
+    from mergemind.guard.secrets import SecretScanner
+
+    sc = SecretScanner(set())
+    link = ("[`app/api/report/pending.ts` L81-90](https://github.com/AfreenInnovates/campus-evac/blob/"
+            "094b013a1802adefe4e1c42c9ab884693cca3d60/app/api/report/pending.ts#L81-L90)")
+    assert sc.scan(link) == []
+    # a real token in a URL path is still caught
+    leaked = "see https://example.org/hooks/AfreenInnovates/q8Zr2LmX9vKp4TnB7wYc3HdJ6sFg"
+    assert [h.kind for h in sc.scan(leaked)] == ["high_entropy"]
